@@ -1,7 +1,7 @@
 let {getRandomItem, updateUsers ,send, getCurrentTime, getNextDay , getApi ,replayId} = require("./lib");
 
 const {Telegraf} = require('telegraf'),
-    bot = new Telegraf(getApi());
+    bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 const ranidb = require('ranidb');
 
 let jsonData = require('../db/azkar.json'),
