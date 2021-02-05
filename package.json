@@ -1,0 +1,18 @@
+{
+  "name": "azkarbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "bulid": ""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "prompt-sync": "^4.2.0",
+    "ranidb": "0.0.5",
+    "telegraf": "^3.38.0"
+  }
+}
