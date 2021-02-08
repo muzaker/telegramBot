@@ -1,1 +1,1 @@
-run: node bot.js
+run: node src/main.js
