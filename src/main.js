@@ -76,6 +76,7 @@ function addTimers() {
     setTimeout(
         () => {
            let mas = require("../db/friDay.json");
+           /* اضف حل لانة التهاني غير موجوده*/
            send(mas, bot, "تهاني جمعة");
         }
         ,

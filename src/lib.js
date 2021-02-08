@@ -32,6 +32,7 @@ module.exports = {
         let {getRandomItem} = require("./lib");
 
         let users = require("../db/users.json");
+        const {Markup} = require('telegraf');
 
         let mas = getRandomItem(Array.from(jsonData).filter(e => e.category === type));
 
@@ -39,10 +40,13 @@ module.exports = {
 
         Array.from(users).forEach(
             user => {
-                bot.telegram.sendMessage(user.id, mas.zekr + count + '\n \n (' + mas.category + ')');
+                bot.telegram.sendMessage(user.id, mas.zekr + count + '\n \n (' + mas.category + ')' , Markup.inlineKeyboard([
+                    [Markup.button.url('باقي الاذكار', 'http://muzaker.github.io/?type=' + type )]])
+                );
             }
         )
-    },
+    }
+    ,
 
     replayId(ctx, txt) {
         ctx.reply(txt, {"reply_to_message_id": ctx.update.message.message_id});

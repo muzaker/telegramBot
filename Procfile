@@ -1,0 +1,1 @@
+run: node bot.js
