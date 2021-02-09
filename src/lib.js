@@ -14,7 +14,7 @@ module.exports = {
 
         let date1 = new Date();
         let date2 = new Date();
-        date2.setHours(h, m);
+        date2.setHours(h + date1.getTimezoneOffset() / 60, m);
         let diffTime = date2 - date1;
         if (diffTime >= 0) {
             return diffTime;
@@ -27,23 +27,31 @@ module.exports = {
 
     },
 
-    send(jsonData, bot, type) {
+    sendAzkar(bot , type) {
 
-        let {getRandomItem} = require("./lib");
-
-        let users = require("../db/users.json");
+        const { getRandomItem, send } = require("./lib");
+        const jsonData = require("../db/azkar.json");
         const {Markup} = require('telegraf');
 
         let mas = getRandomItem(Array.from(jsonData).filter(e => e.category === type));
 
         let count = (mas.count === "1" || mas.count === "") ? "" : "\n \n" + mas.count + " مرات ";
 
-        Array.from(users).forEach(
+        send(
             user => {
-                bot.telegram.sendMessage(user.id, mas.zekr + count + '\n \n (' + mas.category + ')' , Markup.inlineKeyboard([
-                    [Markup.button.url('باقي الاذكار', 'http://muzaker.github.io/?type=' + type )]])
-                );
+                bot.telegram.sendMessage(user.id, mas.zekr + count + '\n \n (' + mas.category + ')', Markup.inlineKeyboard([
+                    [Markup.button.url('باقي الاذكار', 'http://muzaker.github.io/?type=' + type)]])
+                )
             }
+        )
+
+    },
+
+    send(fun) {
+        let users = require("../db/users.json");
+
+        Array.from(users).forEach(
+            fun
         )
     }
     ,

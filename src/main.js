@@ -1,4 +1,4 @@
-let {getRandomItem, updateUsers ,send, getCurrentTime, getNextDay , getApi ,replayId} = require("./lib");
+let {getRandomItem, updateUsers ,sendAzkar , send , getCurrentTime, getNextDay , getApi ,replayId} = require("./lib");
 
 const {Telegraf} = require('telegraf'),
     bot = new Telegraf(process.env.BOT_TOKEN || getApi());
@@ -8,7 +8,6 @@ let jsonData = require('../db/azkar.json'),
     db = new ranidb("./db/users.json");
 
 bot.on('text', (ctx) => {
-
         let txt = ctx.update.message.text;
 
         console.log(txt);
@@ -29,7 +28,8 @@ bot.on('text', (ctx) => {
 
     });
 
-addTimers()
+
+addTimers();
 
 bot.launch();
 
@@ -43,10 +43,10 @@ function addTimers() {
     setTimeout(
         () => {
 
-            send(jsonData, bot, "أذكار الصباح");
+            sendAzkar( bot , "أذكار الصباح");
 
             setInterval(
-                () => send(jsonData, bot, "أذكار الصباح")
+                () => sendAzkar(jsonData, bot, "أذكار الصباح")
                 ,
                 (24 * 60 * 60 * 1000)
             )
@@ -61,10 +61,10 @@ function addTimers() {
     setTimeout(
         () => {
 
-            send(jsonData, bot, "أذكار المساء");
+            sendAzkar(bot , "أذكار المساء");
 
             setInterval(
-                () => send(jsonData, bot, "أذكار المساء")
+                () => sendAzkar(jsonData, bot, "أذكار المساء")
                 ,
                 (24 * 60 * 60 * 1000)
             )
@@ -77,7 +77,11 @@ function addTimers() {
         () => {
            let mas = require("../db/friDay.json");
            /* اضف حل لانة التهاني غير موجوده*/
-           send(mas, bot, "تهاني جمعة");
+            send(
+                e=>{
+                    bot.telegram.sendMessage(e.id , getRandomItem(require("../db/friDay.json")))
+                }
+            );
         }
         ,
 
