@@ -38,7 +38,7 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 const options = {
     scheduled: true,
-    timezone: "Asia/Kuching"
+    timezone: "Asia/Kuwait"
 };
 
 cron.schedule('* * 8 * *', () => {
