@@ -54,7 +54,7 @@ module.exports = {
 
         const api = prompt('What is your api bot? => ');
 
-        const content = 'BOT_TOKEN=' + api +"\n ADMIN=";
+        const content = 'BOT_TOKEN=' + api ;
 
         fs.writeFile('./.env', content , err => {});
 

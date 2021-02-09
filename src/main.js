@@ -9,10 +9,10 @@ let {getRandomItem, updateUsers, sendAzkar, send , getApi, replayId} = require("
 // import Json Data
 let jsonData = require('../db/azkar.json');
 const db = new ranidb("./db/users.json");
-// make new bot
-const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 // config .env file
 require('dotenv').config();
+// make new bot
+const bot = new Telegraf( process.env.BOT_TOKEN || getApi() );
 // when start bot
 bot.start((ctx) => updateUsers(db, ctx, bot));
 // when you need bot start
@@ -47,8 +47,8 @@ cron.schedule('* * 8 * *', () => {
 cron.schedule('* * 20 * *', () => {
     sendAzkar(bot, "أذكار المساء");
 } , options);
-cron.schedule('* * 9 * Fri', () => {
+cron.schedule('* * 9 * 5', () => {
     send(e=>{
-            bot.telegram.sendMessage(e.id , getRandomItem(require("../db/friDay.json")))
+            bot.telegram.sendMessage(e.id , getRandomItem(require("../db/friDay.json")).zekr)
         });
 } , options);
