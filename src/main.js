@@ -1,91 +1,54 @@
-let {getRandomItem, updateUsers ,sendAzkar , send , getCurrentTime, getNextDay , getApi ,replayId} = require("./lib");
-
-const {Telegraf} = require('telegraf'),
-    bot = new Telegraf(process.env.BOT_TOKEN || getApi());
+// import Telegraf
+const {Telegraf} = require('telegraf');
+// import cron
+const cron = require('node-cron');
+// import ranidb
 const ranidb = require('ranidb');
+// import function
+let {getRandomItem, updateUsers, sendAzkar, send , getApi, replayId} = require("./lib");
+// import Json Data
+let jsonData = require('../db/azkar.json');
+const db = new ranidb("./db/users.json");
+// make new bot
+const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
+// config .env file
+require('dotenv').config();
+// when start bot
+bot.start((ctx) => updateUsers(db, ctx, bot));
+// when you need bot start
+bot.command("on", ctx =>
+    updateUsers(db, ctx, bot)
+);
+//get new Message
+bot.command("new", (ctx) => {
 
-let jsonData = require('../db/azkar.json'),
-    db = new ranidb("./db/users.json");
+    let mas = getRandomItem(jsonData);
 
-bot.on('text', (ctx) => {
-        let txt = ctx.update.message.text;
+    let count = (mas.count === "1" || mas.count === "") ? "" : "\n \n" + mas.count + " مرات ";
 
-        console.log(txt);
+    replayId(ctx, mas.zekr + count + '\n \n (' + mas.category + ')');
 
-        if (txt === "فذكر" || txt === "ذكر") {
+})
 
-            let mas = getRandomItem(jsonData);
-
-            let count = (mas.count === "1" || mas.count === "") ? "" : "\n \n" + mas.count + " مرات ";
-
-            replayId( ctx , mas.zekr + count + '\n \n (' + mas.category + ')');
-
-        } else if (txt.startsWith("/on") || txt.startsWith("/start")) {
-
-            updateUsers( db , ctx , bot)
-
-        }
-
-    });
-
-
-addTimers();
-
-bot.launch();
+bot.launch().then(r => {});
 
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
+const options = {
+    scheduled: true,
+    timezone: "Asia/Kuching"
+};
 
-function addTimers() {
-
-    setTimeout(
-        () => {
-
-            sendAzkar( bot , "أذكار الصباح");
-
-            setInterval(
-                () => sendAzkar(jsonData, bot, "أذكار الصباح")
-                ,
-                (24 * 60 * 60 * 1000)
-            )
-        }
-
-        ,
-
-        getCurrentTime(8 , 0)
-
-    )
-
-    setTimeout(
-        () => {
-
-            sendAzkar(bot , "أذكار المساء");
-
-            setInterval(
-                () => sendAzkar(jsonData, bot, "أذكار المساء")
-                ,
-                (24 * 60 * 60 * 1000)
-            )
-        }
-
-        ,
-        getCurrentTime(8 + 12 , 0)
-    )
-    setTimeout(
-        () => {
-           let mas = require("../db/friDay.json");
-           /* اضف حل لانة التهاني غير موجوده*/
-            send(
-                e=>{
-                    bot.telegram.sendMessage(e.id , getRandomItem(require("../db/friDay.json")))
-                }
-            );
-        }
-        ,
-
-        getNextDay("fri") - new Date()
-    )
-
-}
+cron.schedule('* * 8 * *', () => {
+    sendAzkar(bot, "أذكار الصباح");
+},options );
+cron.schedule('* * 20 * *', () => {
+    sendAzkar(bot, "أذكار المساء");
+} , options);
+cron.schedule('* * 9 * Fri', () => {
+    send(e=>{
+            bot.telegram.sendMessage(e.id , getRandomItem(require("../db/friDay.json")))
+        });
+} , options);

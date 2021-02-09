@@ -2,3 +2,4 @@
 /.idea
 .gitgnore
 test.js
+.env

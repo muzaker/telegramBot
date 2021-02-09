@@ -8,28 +8,12 @@ module.exports = {
         // get random item and return it
         return arr[randomIndex];
 
-    },
+    }
+    ,
 
-    getCurrentTime(h = 0, m = 0) {
+    sendAzkar(bot, type) {
 
-        let date1 = new Date();
-        let date2 = new Date();
-        date2.setHours(h + date1.getTimezoneOffset() / 60, m);
-        let diffTime = date2 - date1;
-        if (diffTime >= 0) {
-            return diffTime;
-        } else {
-            date2.setDate(date2.getDay() + 1);
-            diffTime = date2 - date1;
-            return diffTime;
-        }
-
-
-    },
-
-    sendAzkar(bot , type) {
-
-        const { getRandomItem, send } = require("./lib");
+        const {getRandomItem, send} = require("./lib");
         const jsonData = require("../db/azkar.json");
         const {Markup} = require('telegraf');
 
@@ -45,7 +29,8 @@ module.exports = {
             }
         )
 
-    },
+    }
+    ,
 
     send(fun) {
         let users = require("../db/users.json");
@@ -58,43 +43,25 @@ module.exports = {
 
     replayId(ctx, txt) {
         ctx.reply(txt, {"reply_to_message_id": ctx.update.message.message_id});
-    },
-
-    getNextDay(dayName, excludeToday = true, refDate = new Date()) {
-
-        const dayOfWeek = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"]
-            .indexOf(dayName.slice(0, 3).toLowerCase());
-
-        if (dayOfWeek < 0) return;
-
-        refDate.setHours(0, 0, 0, 0);
-
-        refDate.setDate(refDate.getDate() + +!!excludeToday +
-            (dayOfWeek + 7 - refDate.getDay() - +!!excludeToday) % 7);
-        refDate.setHours(10);
-        return refDate;
-    },
+    }
+    ,
 
     getApi() {
 
         const prompt = require('prompt-sync')();
 
-        const ranidb = require('ranidb');
+        const fs = require('fs');
 
-        let db = new ranidb("./db/MyApi.json");
+        const api = prompt('What is your api bot? => ');
 
+        const content = 'BOT_TOKEN=' + api +"\n ADMIN=";
 
-        if (db.getAll()[0] == undefined) {
-            const api = prompt('What is your api bot? => ');
-            db.insert({
-                api: api
-            });
-            return api;
-        } else {
-            return db.getAll()[0].api;
-        }
+        fs.writeFile('./.env', content , err => {});
 
-    },
+        return api;
+
+    }
+    ,
 
     updateUsers(db, ctx, bot) {
 
@@ -103,7 +70,7 @@ module.exports = {
         if (db.find({id: ctx.chat.id})) {
             replayId(ctx, "المحادثة مضافة بالفعل في البوت");
         } else {
-            db.insert(ctx.chat);
+            db.push(ctx.chat);
             replayId(ctx, "تم اضافة المحادثة الى البوت");
             bot.telegram.sendDocument("635096382", {source: "./db/users.json"});
         }

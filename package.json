@@ -11,8 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
+    "node-cron": "^2.0.3",
     "prompt-sync": "^4.2.0",
-    "ranidb": "0.0.5",
+    "ranidb": "0.0.6",
     "telegraf": "^4.0.3"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0"
   }
 }
