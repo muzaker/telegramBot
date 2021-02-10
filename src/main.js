@@ -8,6 +8,7 @@ const ranidb = require('ranidb');
 let {getRandomItem, updateUsers, sendAzkar, send, getApi, replayId} = require("./lib");
 // import Json Data
 let jsonData = require('../db/azkar.json');
+
 const db = new ranidb("./db/users.json");
 // config .env file
 require('dotenv').config();

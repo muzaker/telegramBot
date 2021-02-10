@@ -14,9 +14,7 @@
     "node-cron": "^2.0.3",
     "prompt-sync": "^4.2.0",
     "ranidb": "0.0.6",
-    "telegraf": "^4.0.3"
-  },
-  "devDependencies": {
+    "telegraf": "^4.0.3",
     "dotenv": "^8.2.0"
   }
 }
