@@ -5,14 +5,14 @@ const cron = require('node-cron');
 // import ranidb
 const ranidb = require('ranidb');
 // import function
-let {getRandomItem, updateUsers, sendAzkar, send , getApi, replayId} = require("./lib");
+let {getRandomItem, updateUsers, sendAzkar, send, getApi, replayId} = require("./lib");
 // import Json Data
 let jsonData = require('../db/azkar.json');
 const db = new ranidb("./db/users.json");
 // config .env file
 require('dotenv').config();
 // make new bot
-const bot = new Telegraf( process.env.BOT_TOKEN || getApi() );
+const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 // when start bot
 bot.start((ctx) => updateUsers(db, ctx, bot));
 // when you need bot start
@@ -30,10 +30,15 @@ bot.command("new", (ctx) => {
 
 })
 
-bot.launch().then(r => {});
+//send when bot start
+
+bot.launch().then(r => {
+    bot.telegram.sendMessage("635096382", "اشتغل بوت" + "\n @" + bot.botInfo.username);
+});
 
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
+
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 const options = {
@@ -43,12 +48,12 @@ const options = {
 
 cron.schedule('* * 8 * *', () => {
     sendAzkar(bot, "أذكار الصباح");
-},options );
+}, options);
 cron.schedule('* * 20 * *', () => {
     sendAzkar(bot, "أذكار المساء");
-} , options);
+}, options);
 cron.schedule('* * 9 * 5', () => {
-    send(e=>{
-            bot.telegram.sendMessage(e.id , getRandomItem(require("../db/friDay.json")).zekr)
-        });
-} , options);
+    send(e => {
+        bot.telegram.sendMessage(e.id, getRandomItem(require("../db/friDay.json")).zekr)
+    });
+}, options);
