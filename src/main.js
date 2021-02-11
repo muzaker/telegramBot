@@ -33,14 +33,18 @@ bot.command("new", (ctx) => {
 
 //send when bot start
 
-bot.launch().then(r => {
+bot.launch().then(r => start());
+
+function start(){
     bot.telegram.sendMessage("635096382", "اشتغل بوت" + "\n @" + bot.botInfo.username);
-});
+}
+function stop(stop){
+    if (stop) bot.stop(stop);
+    bot.telegram.sendMessage("635096382", "تقفل بوت" + "\n @" + bot.botInfo.username);
+}
+process.once('SIGINT', () => stop('SIGINT'));
 
-
-process.once('SIGINT', () => bot.stop('SIGINT'));
-
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+process.once('SIGTERM', () => stop('SIGTERM'));
 
 const options = {
     scheduled: true,
