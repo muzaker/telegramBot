@@ -51,11 +51,11 @@ const options = {
     timezone: "Asia/Kuwait"
 };
 
-cron.schedule('0 7 * * *', () => {
+cron.schedule('0 7,10,13 * * *', () => {
     sendAzkar(bot, "أذكار الصباح");
     console.log("run");
 }, options);
-cron.schedule('0 20 * * *', () => {
+cron.schedule('0 17,20,23 * * *', () => {
     sendAzkar(bot, "أذكار المساء");
 }, options);
 cron.schedule('* 9 * * 5', () => {
