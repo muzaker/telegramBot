@@ -47,13 +47,14 @@ const options = {
     timezone: "Asia/Kuwait"
 };
 
-cron.schedule('* * 8 * *', () => {
+cron.schedule('0 7 * * *', () => {
     sendAzkar(bot, "أذكار الصباح");
+    console.log("run");
 }, options);
-cron.schedule('* * 20 * *', () => {
+cron.schedule('0 20 * * *', () => {
     sendAzkar(bot, "أذكار المساء");
 }, options);
-cron.schedule('* * 9 * 5', () => {
+cron.schedule('* 9 * * 5', () => {
     send(e => {
         bot.telegram.sendMessage(e.id, getRandomItem(require("../db/friDay.json")).zekr)
     });

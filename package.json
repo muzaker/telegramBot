@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/main.js",
-    "bulid": ""
+    "bulid": "",
+    "test": "node test.js"
   },
   "author": "",
   "license": "ISC",
