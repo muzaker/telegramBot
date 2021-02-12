@@ -58,7 +58,7 @@ cron.schedule('0 7,10,13 * * *', () => {
 cron.schedule('0 17,20,23 * * *', () => {
     sendAzkar(bot, "أذكار المساء");
 }, options);
-cron.schedule('* 9 * * 5', () => {
+cron.schedule('0 9 * * 5', () => {
     send(e => {
         bot.telegram.sendMessage(e.id, getRandomItem(require("../db/friDay.json")).zekr)
     });
