@@ -1,3 +1,5 @@
+const path = require("path");
+path.dirname(process.mainModule.filename) + '\\db'
 // import Telegraf
 const {Telegraf} = require('telegraf');
 // import cron
@@ -9,7 +11,7 @@ let {getRandomItem, updateUsers, sendAzkar, send, getApi, replayId} = require(".
 // import Json Data
 let jsonData = require('../db/azkar.json');
 
-const db = new ranidb("./db/users.json");
+const db = new ranidb(path.dirname(process.mainModule.filename) + '\\db\\user.json');
 // config .env file
 require('dotenv').config();
 // make new bot
