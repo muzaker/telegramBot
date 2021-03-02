@@ -87,4 +87,13 @@ and name is ${(chat.first_name + chat.last_name) || chat.title}
         }
     }
 
+    ,
+    async updateJson(ctx , db) {
+        const axios = require('axios');
+        const {file_id: fileId} = ctx.update.message.reply_to_message.document;
+        const fileUrl = await ctx.telegram.getFileLink(fileId);
+        const response = await axios.get(fileUrl.href);
+        db.save(response.data);
+        ctx.reply("تم بنجاح")
+    }
 }
