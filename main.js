@@ -44,10 +44,9 @@ bot.command("date", ctx => {
 
 bot.command("send" , ctx =>{
     if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
-        ctx.reply(ctx.message)
-        /*send(e => {
+        send(e => {
             bot.telegram.sendMessage(e.id, ctx.message.reply_to_message.text)
-        });*/
+        });
     }
 })
 
