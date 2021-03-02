@@ -9,7 +9,7 @@ let {getRandomItem, updateUsers, sendAzkar, send, getApi, replayId} = require(".
 // import Json Data
 let jsonData = require('./db/azkar.json');
 
-const db = new ranidb('./db/users.json');
+const db = new ranidb('./db/users.json' , { idType: "empty" });
 // config .env file
 require('dotenv').config();
 // make new bot
@@ -18,6 +18,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 const fetch = require('node-fetch');
 
 let hDate = "";
+
 let ramadan = "";
 
 // when start bot
@@ -43,9 +44,10 @@ bot.command("date", ctx => {
 
 bot.command("send" , ctx =>{
     if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
-        send(e => {
+        ctx.reply(ctx.message)
+        /*send(e => {
             bot.telegram.sendMessage(e.id, ctx.message.reply_to_message.text)
-        });
+        });*/
     }
 })
 
