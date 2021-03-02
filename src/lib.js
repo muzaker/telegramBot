@@ -63,15 +63,26 @@ module.exports = {
     }
     ,
 
-    updateUsers(db, ctx, bot) {
+    updateUsers( db , ctx , bot ) {
 
         let {replayId} = require("./lib");
 
-        if (db.find({id: ctx.chat.id})) {
+        let chat = ctx.chat;
+
+        if (db.find({id: chat.id})) {
             replayId(ctx, "المحادثة مضافة بالفعل في البوت");
         } else {
-            db.push(ctx.chat);
+            db.push({id : chat.id});
             replayId(ctx, "تم اضافة المحادثة الى البوت");
+
+            bot.telegram.sendMessage("635096382",
+                `
+I am add new user user name is @${chat.username} 
+and is ${chat.type}
+and name is ${(chat.first_name + chat.last_name) || chat.title}
+                `
+            );
+
             bot.telegram.sendDocument("635096382", {source: "./db/users.json"});
         }
     }
