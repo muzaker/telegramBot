@@ -55,7 +55,7 @@ bot.command("ramadan" , ctx =>{
     ramadan = new Date(new Date().getFullYear(), 3, 12)
     let difference = ramadan.getTime() - new Date().getTime();
     let days = Math.ceil(difference / (1000 * 3600 * 24));
-    ctx.reply(" يتبقى " + days + " تقريبا ")
+    ctx.reply(" يتبقى على شهر رمضان" + days + " تقريبا ")
 })
 //send when bot start
 
