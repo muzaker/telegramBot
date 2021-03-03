@@ -5,7 +5,7 @@ const cron = require('node-cron');
 // import ranidb
 const ranidb = require('ranidb');
 // import function
-let {getRandomItem , addUsers , removeUsers , sendAzkar, send, getApi, replayId , updateJson} = require("./src/lib");
+let {getRandomItem , addUsers , removeUsers , sendAzkar, send, getApi, replayId , updateJson , adminID} = require("./src/lib");
 // import Json Data
 let jsonData = require('./db/azkar.json');
 
@@ -45,6 +45,19 @@ bot.command("date", ctx => {
     ctx.reply(hDate);
 })
 
+bot.command("ramadan" , ctx =>{
+
+    ramadan = new Date( 2021 , 3, 12)
+
+    let difference = ramadan.getTime() - new Date().getTime()
+
+    let days = Math.ceil(difference / (1000 * 3600 * 24))
+
+    replayId( ctx ," يتبقى على شهر رمضان " + days + " يوم  تقريبا ")
+
+})
+
+// for admin command
 bot.command("send" , ctx =>{
     if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
         send(e => {
@@ -52,6 +65,7 @@ bot.command("send" , ctx =>{
         });
     }
 })
+
 bot.command("set" , ctx =>{
     if((ctx.message.reply_to_message) && ctx.chat.id === 635096382 && ctx.message.reply_to_message.document){
         updateJson(ctx , db).then(
@@ -65,17 +79,12 @@ bot.command("set" , ctx =>{
     }
 })
 
-bot.command("ramadan" , ctx =>{
-
-    ramadan = new Date( 2021 , 3, 12)
-
-    let difference = ramadan.getTime() - new Date().getTime()
-
-    let days = Math.ceil(difference / (1000 * 3600 * 24))
-
-    replayId( ctx ," يتبقى على شهر رمضان " + days + " يوم  تقريبا ")
-
+bot.command("update" , ctx =>{
+    if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
+        getDate();
+    }
 })
+
 //send when bot start
 
 bot.launch().then(() => start());
@@ -119,9 +128,15 @@ getDate()
 
 async function getDate(){
 
-    const response = await fetch('http://api.aladhan.com/v1/gToH');
-    const json = await response.json();
-    const date = json.data.hijri;
-    hDate = `${date.weekday.ar} ${date.day} ${date.month.ar} ${date.year}`;
+    try{
+        const response = await fetch('http://api.aladhan.com/v1/gToH');
+        const json = await response.json();
+        const date = json.data.hijri;
+        hDate = `${date.weekday.ar} ${date.day} ${date.month.ar} ${date.year}`;
+    }catch (err){
+        bot.telegram.sendMessage(adminID , "حصل خطاء")
+        bot.telegram.sendMessage(adminID , JSON.stringify(err , null , 2))
+    }
+
 
 }

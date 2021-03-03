@@ -1,5 +1,7 @@
 module.exports = {
 
+    adminID : "635096382",
+
     getRandomItem(arr) {
 
         // get random index value
@@ -65,7 +67,7 @@ module.exports = {
 
     addUsers( db , ctx , bot ) {
 
-        let {replayId} = require("./lib");
+        let {replayId , adminID} = require("./lib");
 
         let chat = ctx.chat;
 
@@ -75,7 +77,7 @@ module.exports = {
             db.push({id : chat.id});
             replayId(ctx, "تم اضافة المحادثة الى الارسال التلقائي");
 
-            bot.telegram.sendMessage("635096382",
+            bot.telegram.sendMessage(adminID ,
                 `
 I am add new user user name is @${chat.username} 
 and is ${chat.type}
@@ -83,13 +85,13 @@ and name is ${(chat.first_name + chat.last_name) || chat.title}
                 `
             );
 
-            bot.telegram.sendDocument("635096382", {source: "./db/users.json"});
+            bot.telegram.sendDocument(adminID , {source: "./db/users.json"});
         }
     },
 
     removeUsers( db , ctx , bot ) {
 
-        let {replayId} = require("./lib");
+        let {replayId , adminID} = require("./lib");
 
         let chat = ctx.chat;
 
@@ -99,7 +101,7 @@ and name is ${(chat.first_name + chat.last_name) || chat.title}
             db.filter({id : chat.id}).delete();
             replayId(ctx, "تم ايقاف الارسال التلقائي لهذه المحادثة");
 
-            bot.telegram.sendMessage("635096382",
+            bot.telegram.sendMessage(adminID,
                 `
 I am remove user user name is @${chat.username} 
 and is ${chat.type}
@@ -107,7 +109,7 @@ and name is ${(chat.first_name + chat.last_name) || chat.title}
                 `
             );
 
-            bot.telegram.sendDocument("635096382", {source: "./db/users.json"});
+            bot.telegram.sendDocument(adminID , {source: "./db/users.json"});
         }
     }
 
