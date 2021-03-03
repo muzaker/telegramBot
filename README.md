@@ -14,3 +14,23 @@ or with yarn:
 ```bash
 yarn add
 ```
+
+#how run
+
+```bash
+npm start
+```
+
+or 
+
+```bash
+node main.js
+```
+
+or used pm2 
+
+https://pm2.keymetrics.io/
+
+```bash
+pm2 start main.js
+```
