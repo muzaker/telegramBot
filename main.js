@@ -5,7 +5,7 @@ const cron = require('node-cron');
 // import ranidb
 const ranidb = require('ranidb');
 // import function
-let {getRandomItem, updateUsers, sendAzkar, send, getApi, replayId , updateJson} = require("./src/lib");
+let {getRandomItem , addUsers , removeUsers , sendAzkar, send, getApi, replayId , updateJson} = require("./src/lib");
 // import Json Data
 let jsonData = require('./db/azkar.json');
 
@@ -22,10 +22,13 @@ let hDate = "";
 let ramadan = "";
 
 // when start bot
-bot.start((ctx) => updateUsers(db, ctx, bot));
+bot.start((ctx) => addUsers(db, ctx, bot));
 // when you need bot start
 bot.command("on", ctx =>
-    updateUsers(db, ctx, bot)
+    addUsers(db, ctx, bot)
+);
+bot.command("off", ctx =>
+    removeUsers(db, ctx, bot)
 );
 //get new Message
 bot.command("new", (ctx) => {
@@ -49,9 +52,16 @@ bot.command("send" , ctx =>{
         });
     }
 })
-bot.command("add" , ctx =>{
+bot.command("set" , ctx =>{
     if((ctx.message.reply_to_message) && ctx.chat.id === 635096382 && ctx.message.reply_to_message.document){
-        updateJson(ctx , db)
+        updateJson(ctx , db).then(
+            ()=> ctx.reply("تم بنجاح")
+        ).catch(
+            err=>{
+                ctx.reply("حصل خطاء")
+                ctx.reply(JSON.stringify(err , null , 2))
+            }
+        )
     }
 })
 

@@ -63,21 +63,45 @@ module.exports = {
     }
     ,
 
-    updateUsers( db , ctx , bot ) {
+    addUsers( db , ctx , bot ) {
 
         let {replayId} = require("./lib");
 
         let chat = ctx.chat;
 
         if (db.find({id: chat.id})) {
-            replayId(ctx, "المحادثة مضافة بالفعل في البوت");
+            replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
         } else {
             db.push({id : chat.id});
-            replayId(ctx, "تم اضافة المحادثة الى البوت");
+            replayId(ctx, "تم اضافة المحادثة الى الارسال التلقائي");
 
             bot.telegram.sendMessage("635096382",
                 `
 I am add new user user name is @${chat.username} 
+and is ${chat.type}
+and name is ${(chat.first_name + chat.last_name) || chat.title}
+                `
+            );
+
+            bot.telegram.sendDocument("635096382", {source: "./db/users.json"});
+        }
+    },
+
+    removeUsers( db , ctx , bot ) {
+
+        let {replayId} = require("./lib");
+
+        let chat = ctx.chat;
+
+        if (!db.find({id: chat.id})) {
+            replayId(ctx, "المحادثة غير مضافه في الارسال التلقائي");
+        } else {
+            db.filter({id : chat.id}).delete();
+            replayId(ctx, "تم ايقاف الارسال التلقائي لهذه المحادثة");
+
+            bot.telegram.sendMessage("635096382",
+                `
+I am remove user user name is @${chat.username} 
 and is ${chat.type}
 and name is ${(chat.first_name + chat.last_name) || chat.title}
                 `
@@ -94,6 +118,6 @@ and name is ${(chat.first_name + chat.last_name) || chat.title}
         const fileUrl = await ctx.telegram.getFileLink(fileId);
         const response = await axios.get(fileUrl.href);
         db.save(response.data);
-        ctx.reply("تم بنجاح")
+        return "";
     }
 }
