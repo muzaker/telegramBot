@@ -90,11 +90,11 @@ bot.command("update" , ctx =>{
 bot.launch().then(() => start());
 
 function start(){
-    bot.telegram.sendMessage("635096382", "اشتغل بوت" + "\n @" + bot.botInfo.username);
+    bot.telegram.sendMessage(adminID , "اشتغل بوت" + "\n @" + bot.botInfo.username);
 }
 function stop(stop){
     if (stop) bot.stop(stop);
-    bot.telegram.sendMessage("635096382", "تقفل بوت" + "\n @" + bot.botInfo.username);
+    bot.telegram.sendMessage(adminID , "تقفل بوت" + "\n @" + bot.botInfo.username);
 }
 process.once('SIGINT', () => stop('SIGINT'));
 
