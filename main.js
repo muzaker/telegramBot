@@ -84,6 +84,11 @@ bot.command("update" , ctx =>{
         getDate();
     }
 })
+bot.command("user" , ctx =>{
+    if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
+        bot.telegram.sendDocument(adminID , {source: "./db/users.json"});
+    }
+})
 
 //send when bot start
 
