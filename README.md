@@ -34,3 +34,7 @@ https://pm2.keymetrics.io/
 ```bash
 pm2 start main.js
 ```
+
+
+commands 
+
