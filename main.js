@@ -1,5 +1,5 @@
 // import Telegraf
-const {Telegraf, Markup} = require('telegraf');
+const {Telegraf, Markup } = require('telegraf');
 // import cron
 const cron = require('node-cron');
 // import ranidb
@@ -96,19 +96,29 @@ bot.command("ramadan", ctx => {
 
     let days = Math.ceil(difference / (1000 * 3600 * 24))
 
-    replayId(ctx, " يتبقى على شهر رمضان " + days + " يوم  تقريبا ")
+    let replay;
 
+    if (days > 0){
+        replay = " يتبقى على شهر رمضان " + days + " يوم  تقريبا "
+    }else if (days > -30){
+        replay = "استغل رمضان الحالي فقد يعود ولاكن بدوننا"
+    }else {
+        replay ="نسئل الله لنا ولكم القبول لم تتم اضافة توقيت لرمضان القادم"
+    }
+    replayId(ctx , replay)
 })
 
 // for admin command
 
 //send message to all users
-bot.command("send", ctx => {
-    if ((ctx.message.reply_to_message) && ctx.chat.id === 635096382) {
-        send(e => {
-            bot.telegram.sendMessage(e.id, ctx.message.reply_to_message.text)
-        });
-    }
+bot.action("send", ctx => {
+    action(ctx , "ارسل رسالتك الان " ,
+        Markup.forceReply()
+    )
+    /*
+    send(e => {
+        bot.telegram.sendMessage(e.id, ctx.message.reply_to_message.text)
+    });*/
 })
 //set json file for users
 bot.command("set", ctx => {
@@ -131,8 +141,13 @@ bot.command("setting", ctx => {
             ,
             Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("قاعدة المستخدمين", "user"),
-                    Markup.button.callback("تحديث التاريخ الهجري", "getDate")
+                    [
+                        Markup.button.callback("قاعدة المستخدمين", "user"),
+                        Markup.button.callback("تحديث التاريخ الهجري", "getDate")
+                    ],
+                    [
+                        Markup.button.callback("ارسال" , "send")
+                    ]
                 ]
             )
         )
@@ -140,9 +155,7 @@ bot.command("setting", ctx => {
 })
 
 //get users
-bot.action("user", ctx => {
-    action(ctx, false, {}, {source: "./db/users.json"})
-})
+bot.action("user", ctx => action(ctx, false, {}, {source: "./db/users.json"}))
 bot.action("getDate", async ctx => {
     await getDate()
     action(ctx , hDate)
@@ -200,6 +213,7 @@ async function getDate() {
     } catch (err) {
         adminSend("حصل خطاء")
         adminSend(JSON.stringify(err, null, 2))
+        console.log("date has worn")
     }
 }
 
