@@ -1,14 +1,14 @@
 // import Telegraf
-const {Telegraf , Markup} = require('telegraf');
+const {Telegraf, Markup} = require('telegraf');
 // import cron
 const cron = require('node-cron');
 // import ranidb
 const ranidb = require('ranidb');
 // import function
-let {getRandomItem , addUsers , removeUsers , sendAzkar, send, replayId, makeMessage , updateJson, Supporter , adminID} = require("./src/lib");
+let {getRandomItem, addUsers, removeUsers, sendAzkar, send, replayId, makeMessage, updateJson, Supporter, adminID} = require("./src/lib");
 // import Json Data
 let jsonData = require('./db/azkar.json');
-const db = new ranidb('./db/users.json' , { idType: "empty" });
+const db = new ranidb('./db/users.json', {idType: "empty"});
 // config .env file
 require('dotenv').config();
 // make new bot
@@ -26,6 +26,7 @@ let about = `بوت عبود هو لنشر اذكار الصباح والمسا�
 let reAbout = Markup.inlineKeyboard([
     [Markup.button.callback("رجوع", "about")]
 ]);
+
 const licenseUrl = "https://ojuba.org/waqf-2.0:%D8%B1%D8%AE%D8%B5%D8%A9_%D9%88%D9%82%D9%81_%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9";
 
 const buttons = Markup.inlineKeyboard([
@@ -59,8 +60,9 @@ bot.action("Supporter", ctx => {
 
 bot.action("supportMe", ctx => {
     action(ctx, "اذا كنت ترغب بدعمنا نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة \n مطور البوت : @superastorh"
-    , reAbout)
+        , reAbout)
 })
+
 bot.action("about", ctx => {
     action(ctx, about, buttons)
 })
@@ -70,12 +72,9 @@ bot.start((ctx) => addUsers(db, ctx, bot));
 // when some one need bot start in this chat
 bot.command("on", ctx => {
         addUsers(db, ctx, bot)
-    }
-);
+    });
 // when some one need bot stop in this chat
-bot.command("off", ctx =>
-    removeUsers(db, ctx, bot)
-);
+bot.command("off", ctx => removeUsers(db, ctx, bot));
 //get new Message
 bot.command("new", (ctx) => {
 
@@ -89,63 +88,78 @@ bot.command("date", ctx => {
     ctx.reply(hDate);
 })
 //get time
-bot.command("ramadan" , ctx =>{
+bot.command("ramadan", ctx => {
 
-    ramadan = new Date( 2021 , 3, 13)
+    ramadan = new Date(2021, 3, 13)
 
     let difference = ramadan.getTime() - new Date().getTime()
 
     let days = Math.ceil(difference / (1000 * 3600 * 24))
 
-    replayId( ctx ," يتبقى على شهر رمضان " + days + " يوم  تقريبا ")
+    replayId(ctx, " يتبقى على شهر رمضان " + days + " يوم  تقريبا ")
 
 })
 
 // for admin command
 
 //send message to all users
-bot.command("send" , ctx =>{
-    if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
+bot.command("send", ctx => {
+    if ((ctx.message.reply_to_message) && ctx.chat.id === 635096382) {
         send(e => {
             bot.telegram.sendMessage(e.id, ctx.message.reply_to_message.text)
         });
     }
 })
 //set json file for users
-bot.command("set" , ctx =>{
-    if((ctx.message.reply_to_message) && ctx.chat.id === 635096382 && ctx.message.reply_to_message.document){
-        updateJson(ctx , db).then(
-            ()=> ctx.reply("تم بنجاح")
+bot.command("set", ctx => {
+    if ((ctx.message.reply_to_message) && ctx.chat.id === 635096382 && ctx.message.reply_to_message.document) {
+        updateJson(ctx, db).then(
+            () => ctx.reply("تم بنجاح")
         ).catch(
-            err=>{
+            err => {
                 ctx.reply("حصل خطاء")
-                ctx.reply(JSON.stringify(err , null , 2))
+                ctx.reply(JSON.stringify(err, null, 2))
             }
         )
     }
 })
 //update h date
-bot.command("update" , ctx =>{
-
+bot.command("setting", ctx => {
+    if (ctx.chat.id === adminID) {
+        ctx.reply(
+            "اهلا بك ايها المشرف"
+            ,
+            Markup.inlineKeyboard(
+                [
+                    Markup.button.callback("قاعدة المستخدمين", "user"),
+                    Markup.button.callback("تحديث التاريخ الهجري", "getDate")
+                ]
+            )
+        )
+    }
 })
 
-//get users for admin
-bot.command("user" , ctx =>{
-    if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
-        bot.telegram.sendDocument(adminID , {source: "./db/users.json"});
-    }
+//get users
+bot.action("user", ctx => {
+    action(ctx, false, {}, {source: "./db/users.json"})
+})
+bot.action("getDate", ctx => {
+    getDate()
+    action(ctx,"تم بنجاح")
 })
 
 //send when bot start
 bot.launch().then(() => start());
 
-function start(){
-    adminSend( "اشتغل بوت" + "\n @" + bot.botInfo.username);
+function start() {
+    adminSend("اشتغل بوت" + "\n @" + bot.botInfo.username);
 }
-function stop(stop){
+
+function stop(stop) {
     if (stop) bot.stop(stop);
-    adminSend( "تقفل بوت" + "\n @" + bot.botInfo.username);
+    adminSend("تقفل بوت" + "\n @" + bot.botInfo.username);
 }
+
 process.once('SIGINT', () => stop('SIGINT'));
 
 process.once('SIGTERM', () => stop('SIGTERM'));
@@ -154,13 +168,12 @@ const options = {
     scheduled: true,
     timezone: "Asia/Kuwait"
 };
-sendAzkar(bot, "أذكار الصباح");
 
-cron.schedule('50 3 * * *', () => {
+cron.schedule('0 7,13 * * *', () => {
     sendAzkar(bot, "أذكار الصباح");
 }, options);
 
-cron.schedule('0 17,20,23 * * *', () => {
+cron.schedule('0 17,19 * * *', () => {
     sendAzkar(bot, "أذكار المساء");
 }, options);
 
@@ -176,35 +189,36 @@ cron.schedule('0 1,5,10 * * *', () => {
 
 getDate()
 
-async function getDate(){
+async function getDate() {
 
-    try{
+    try {
         const response = await fetch('http://api.aladhan.com/v1/gToH');
         const json = await response.json();
         const date = json.data.hijri;
         hDate = `${date.weekday.ar} ${date.day} ${date.month.ar} ${date.year}`;
-    }catch (err){
+    } catch (err) {
         adminSend("حصل خطاء")
-        adminSend( JSON.stringify(err , null , 2))
+        adminSend(JSON.stringify(err, null, 2))
     }
 }
-function adminSend(txt){
-    sendMessage(adminID , txt )
+
+function adminSend(txt) {
+    sendMessage(adminID, txt)
 }
 
-function action(ctx , message , extra = {}){
+function action(ctx, message, extra = {}, doc) {
     let chat = ctx.update.callback_query.message.chat.id;
     let messageId = ctx.update.callback_query.message.message_id;
     deleteMessage(chat, messageId)
-    sendMessage(chat, message , extra)
+    if (message) sendMessage(chat, message, extra)
+    if (doc) bot.telegram.sendDocument(chat, doc).then()
 }
-
 
 function deleteMessage(chat_id, message_id) {
     bot.telegram.deleteMessage(chat_id, message_id).then()
 }
 
-function sendMessage(chatId , text , extra = {} ) {
+function sendMessage(chatId, text, extra = {}) {
     bot.telegram.sendMessage(chatId, text, extra).then()
 }
 
@@ -216,9 +230,10 @@ function getApi() {
 
     const api = prompt('What is your api bot? => ');
 
-    const content = 'BOT_TOKEN=' + api ;
+    const content = 'BOT_TOKEN=' + api;
 
-    fs.writeFile('.env', content , () => {});
+    fs.writeFile('.env', content, () => {
+    });
 
     return api;
 

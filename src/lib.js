@@ -1,6 +1,6 @@
 module.exports = {
 
-    adminID : "635096382",
+    adminID : 635096382,
 
     getRandomItem(arr) {
 
