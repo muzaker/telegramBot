@@ -1,3 +1,5 @@
+// import hijri-date
+require('hijri-date');
 // import Telegraf
 const {Telegraf, Markup } = require('telegraf');
 // import cron
@@ -13,11 +15,9 @@ const db = new ranidb('./db/users.json', {idType: "empty"});
 require('dotenv').config();
 // make new bot
 const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
-// import fetch
-const fetch = require('node-fetch');
 // make vars
-let hDate = "";
 let ramadan = "";
+let sendActive = false;
 let about = `بوت عبود هو لنشر اذكار الصباح والمساء بشكل دوري في المجموعات 
 البوت مجاني تماما و مفتوح المصدر
 
@@ -85,7 +85,7 @@ bot.command("new", (ctx) => {
 })
 //get hdate
 bot.command("date", ctx => {
-    ctx.reply(hDate);
+    ctx.reply(Hijri());
 })
 //get time
 bot.command("ramadan", ctx => {
@@ -109,12 +109,12 @@ bot.command("ramadan", ctx => {
 })
 
 // for admin command
-
 //send message to all users
 bot.action("send", ctx => {
     action(ctx , "ارسل رسالتك الان " ,
         Markup.forceReply()
     )
+    sendActive = true;
     /*
     send(e => {
         bot.telegram.sendMessage(e.id, ctx.message.reply_to_message.text)
@@ -128,7 +128,7 @@ bot.command("set", ctx => {
         ).catch(
             err => {
                 ctx.reply("حصل خطاء")
-                ctx.reply(JSON.stringify(err, null, 2))
+                console.log(err)
             }
         )
     }
@@ -143,7 +143,6 @@ bot.command("setting", ctx => {
                 [
                     [
                         Markup.button.callback("قاعدة المستخدمين", "user"),
-                        Markup.button.callback("تحديث التاريخ الهجري", "getDate")
                     ],
                     [
                         Markup.button.callback("ارسال" , "send")
@@ -156,9 +155,13 @@ bot.command("setting", ctx => {
 
 //get users
 bot.action("user", ctx => action(ctx, false, {}, {source: "./db/users.json"}))
-bot.action("getDate", async ctx => {
-    await getDate()
-    action(ctx , hDate)
+bot.on("text" , ctx =>{
+    let reply_to_message = ctx.message.reply_to_message;
+    if (reply_to_message && reply_to_message.from.id === bot.botInfo.id && reply_to_message.text === "ارسل رسالتك الان " && sendActive) {
+        ctx.reply(ctx.message.text);
+        sendActive = false;
+    }
+    console.log(reply_to_message , reply_to_message.from.id === bot.botInfo.id , reply_to_message.text , sendActive)
 })
 
 //send when bot start
@@ -196,25 +199,35 @@ cron.schedule('0 9 * * 5', () => {
     });
 }, options);
 
-cron.schedule('0 1,5,10 * * *', () => {
-    getDate();
-}, options);
+function Hijri() {
+    let Hijri = new HijriDate();
 
-getDate()
+    let days = [
+        "الاحد",
+        "الاثنين",
+        "الثلاثاء",
+        "الاربعاء",
+        "الخميس",
+        "الجمعة",
+        "السبت"
+    ];
 
-async function getDate() {
+    let mo = [
+        "مُحرَّم",
+        "صفَر",
+        "ربيعالأول",
+        "ربيعالآخر",
+        "جماديالأول",
+        "جماديالآخر",
+        "رَجب",
+        "شَعبان",
+        "رَمضان",
+        "شوّال",
+        "ذوالقِعدة",
+        "ذوالحِجّة"
+    ];
 
-    try {
-        const response = await fetch('http://api.aladhan.com/v1/gToH');
-        const json = await response.json();
-        const date = json.data.hijri;
-        hDate = `${date.weekday.ar} ${date.day} ${date.month.ar} ${date.year}`;
-        return hDate;
-    } catch (err) {
-        adminSend("حصل خطاء")
-        adminSend(JSON.stringify(err, null, 2))
-        console.log("date has worn")
-    }
+    return `${days[Hijri.day]} ${Hijri.date} ${mo[Hijri.month - 1]} ${Hijri.year}`;
 }
 
 function adminSend(txt) {
@@ -253,3 +266,5 @@ function getApi() {
     return api;
 
 }
+
+
