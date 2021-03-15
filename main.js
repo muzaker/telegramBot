@@ -15,8 +15,6 @@ require('dotenv').config();
 const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 // import fetch
 const fetch = require('node-fetch');
-// import plugin to make pull
-const git = require('git-pull-or-clone')
 // make vars
 let hDate = "";
 let ramadan = "";
@@ -220,7 +218,7 @@ function getApi() {
 
     const content = 'BOT_TOKEN=' + api ;
 
-    fs.writeFile('.env', content , err => {});
+    fs.writeFile('.env', content , () => {});
 
     return api;
 
