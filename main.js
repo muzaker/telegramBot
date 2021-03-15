@@ -143,9 +143,9 @@ bot.command("setting", ctx => {
 bot.action("user", ctx => {
     action(ctx, false, {}, {source: "./db/users.json"})
 })
-bot.action("getDate", ctx => {
-    getDate()
-    action(ctx,"تم بنجاح")
+bot.action("getDate", async ctx => {
+    await getDate()
+    action(ctx , hDate)
 })
 
 //send when bot start
@@ -196,6 +196,7 @@ async function getDate() {
         const json = await response.json();
         const date = json.data.hijri;
         hDate = `${date.weekday.ar} ${date.day} ${date.month.ar} ${date.year}`;
+        return hDate;
     } catch (err) {
         adminSend("حصل خطاء")
         adminSend(JSON.stringify(err, null, 2))
