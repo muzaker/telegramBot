@@ -1,32 +1,69 @@
 // import Telegraf
-const {Telegraf} = require('telegraf');
+const {Telegraf , Markup} = require('telegraf');
 // import cron
 const cron = require('node-cron');
 // import ranidb
 const ranidb = require('ranidb');
 // import function
-let {getRandomItem , addUsers , removeUsers , sendAzkar, send, getApi, replayId , updateJson , adminID} = require("./src/lib");
+let {getRandomItem , addUsers , removeUsers , sendAzkar, send, replayId, makeMessage , updateJson, Supporter , adminID} = require("./src/lib");
 // import Json Data
 let jsonData = require('./db/azkar.json');
-
 const db = new ranidb('./db/users.json' , { idType: "empty" });
 // config .env file
 require('dotenv').config();
 // make new bot
 const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
-
+// import fetch
 const fetch = require('node-fetch');
-
+// import plugin to make pull
+const git = require('git-pull-or-clone')
+// make vars
 let hDate = "";
-
 let ramadan = "";
+const licenseUrl = "https://ojuba.org/waqf-2.0:%D8%B1%D8%AE%D8%B5%D8%A9_%D9%88%D9%82%D9%81_%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9";
 
-// when start bot
+const buttons = Markup.inlineKeyboard([
+    [
+        Markup.button.url('المطور', 'https://t.me/superastorh'),
+        Markup.button.url("الرخصة", licenseUrl)
+    ],
+    [
+        Markup.button.callback("ادعمنا", "supportMe"),
+        Markup.button.callback("الداعمين", "Supporter")
+    ],
+])
+
+bot.command("about", ctx => {
+    if (ctx.message.chat.type !== 'supergroup') {
+        ctx.reply(`بوت عبود هو لنشر اذكار الصباح والمساء بشكل دوري في المجموعات 
+البوت مجاني تماما و مفتوح المصدر
+
+لذالك نروج منك دعمنا حتى نستمر
+    `, buttons);
+    } else {
+        ctx.reply("لاتعمل الرساله في المجموعات تواصل معي خاص" + " @" + bot.botInfo.username)
+    }
+})
+
+bot.action("Supporter", ctx => {
+    let keyBord = Markup.inlineKeyboard([
+        [Markup.button.callback("ادعمنا", "supportMe")]
+    ]);
+    action(ctx, "الداعمين هم السبب الرائيسي في عمل البوت الخاص بنا وهم" + "\n\n" + Supporter(), keyBord)
+})
+
+bot.action("supportMe", ctx => {
+    action(ctx, "اذا كنت ترغب بدعمنا نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة \n مطور البوت : @superastorh")
+})
+
+// when start chat on bot
 bot.start((ctx) => addUsers(db, ctx, bot));
-// when you need bot start
-bot.command("on", ctx =>
-    addUsers(db, ctx, bot)
+// when some one need bot start in this chat
+bot.command("on", ctx => {
+        addUsers(db, ctx, bot)
+    }
 );
+// when some one need bot stop in this chat
 bot.command("off", ctx =>
     removeUsers(db, ctx, bot)
 );
@@ -35,19 +72,17 @@ bot.command("new", (ctx) => {
 
     let mas = getRandomItem(jsonData);
 
-    let count = (mas.count === "1" || mas.count === "") ? "" : "\n \n" + mas.count + " مرات ";
-
-    replayId(ctx, mas.zekr + count + '\n \n (' + mas.category + ')');
+    replayId(ctx, makeMessage(mas));
 
 })
-
+//get hdate
 bot.command("date", ctx => {
     ctx.reply(hDate);
 })
-
+//get time
 bot.command("ramadan" , ctx =>{
 
-    ramadan = new Date( 2021 , 3, 12)
+    ramadan = new Date( 2021 , 3, 13)
 
     let difference = ramadan.getTime() - new Date().getTime()
 
@@ -58,6 +93,8 @@ bot.command("ramadan" , ctx =>{
 })
 
 // for admin command
+
+//send message to all users
 bot.command("send" , ctx =>{
     if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
         send(e => {
@@ -65,7 +102,7 @@ bot.command("send" , ctx =>{
         });
     }
 })
-
+//set json file for users
 bot.command("set" , ctx =>{
     if((ctx.message.reply_to_message) && ctx.chat.id === 635096382 && ctx.message.reply_to_message.document){
         updateJson(ctx , db).then(
@@ -78,12 +115,12 @@ bot.command("set" , ctx =>{
         )
     }
 })
-
+//update h date
 bot.command("update" , ctx =>{
-    if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
-        getDate();
-    }
+
 })
+
+//get users for admin
 bot.command("user" , ctx =>{
     if((ctx.message.reply_to_message) && ctx.chat.id === 635096382){
         bot.telegram.sendDocument(adminID , {source: "./db/users.json"});
@@ -91,15 +128,14 @@ bot.command("user" , ctx =>{
 })
 
 //send when bot start
-
 bot.launch().then(() => start());
 
 function start(){
-    bot.telegram.sendMessage(adminID , "اشتغل بوت" + "\n @" + bot.botInfo.username);
+    adminSend( "اشتغل بوت" + "\n @" + bot.botInfo.username);
 }
 function stop(stop){
     if (stop) bot.stop(stop);
-    bot.telegram.sendMessage(adminID , "تقفل بوت" + "\n @" + bot.botInfo.username);
+    adminSend( "تقفل بوت" + "\n @" + bot.botInfo.username);
 }
 process.once('SIGINT', () => stop('SIGINT'));
 
@@ -109,10 +145,10 @@ const options = {
     scheduled: true,
     timezone: "Asia/Kuwait"
 };
+sendAzkar(bot, "أذكار الصباح");
 
-cron.schedule('0 7,10,13 * * *', () => {
+cron.schedule('50 3 * * *', () => {
     sendAzkar(bot, "أذكار الصباح");
-    console.log("run");
 }, options);
 
 cron.schedule('0 17,20,23 * * *', () => {
@@ -121,11 +157,11 @@ cron.schedule('0 17,20,23 * * *', () => {
 
 cron.schedule('0 9 * * 5', () => {
     send(e => {
-        bot.telegram.sendMessage(e.id, getRandomItem(require("./db/friDay.json")).zekr)
+        sendMessage(e.id, getRandomItem(require("./db/friDay.json")).zekr)
     });
 }, options);
 
-cron.schedule('0 1 * * *', () => {
+cron.schedule('0 1,5,10 * * *', () => {
     getDate();
 }, options);
 
@@ -139,9 +175,42 @@ async function getDate(){
         const date = json.data.hijri;
         hDate = `${date.weekday.ar} ${date.day} ${date.month.ar} ${date.year}`;
     }catch (err){
-        bot.telegram.sendMessage(adminID , "حصل خطاء")
-        bot.telegram.sendMessage(adminID , JSON.stringify(err , null , 2))
+        adminSend("حصل خطاء")
+        adminSend( JSON.stringify(err , null , 2))
     }
+}
+function adminSend(txt){
+    sendMessage(adminID , txt )
+}
 
+function action(ctx , message , extra = {}){
+    let chat = ctx.update.callback_query.message.chat.id;
+    let messageId = ctx.update.callback_query.message.message_id;
+    deleteMessage(chat, messageId)
+    sendMessage(chat, message , extra)
+}
+
+
+function deleteMessage(chat_id, message_id) {
+    bot.telegram.deleteMessage(chat_id, message_id).then()
+}
+
+function sendMessage(chatId , text , extra = {} ) {
+    bot.telegram.sendMessage(chatId, text, extra).then()
+}
+
+function getApi() {
+
+    const prompt = require('prompt-sync')();
+
+    const fs = require('fs');
+
+    const api = prompt('What is your api bot? => ');
+
+    const content = 'BOT_TOKEN=' + api ;
+
+    fs.writeFile('.env', content , err => {});
+
+    return api;
 
 }

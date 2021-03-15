@@ -12,22 +12,27 @@ module.exports = {
 
     }
     ,
+    makeMessage(mas){
+        let count = (mas.count === "1" || mas.count === "") ? "" : "\n\n" + mas.count + " مرات ";
 
+        let reference = !mas.reference ? "" : "\n\n" + " رواة " + mas.reference;
+
+        return  '[ - ' + mas.category + ' - ]'+ "\n\n" + mas.zekr +  count + reference;
+    }
+    ,
     sendAzkar(bot, type) {
 
-        const {getRandomItem, send} = require("./lib");
+        const {getRandomItem , makeMessage, send} = require("./lib");
         const jsonData = require("../db/azkar.json");
         const {Markup} = require('telegraf');
 
         let mas = getRandomItem(Array.from(jsonData).filter(e => e.category === type));
 
-        let count = (mas.count === "1" || mas.count === "") ? "" : "\n \n" + mas.count + " مرات ";
-
         send(
             user => {
-                bot.telegram.sendMessage(user.id, mas.zekr + count + '\n \n (' + mas.category + ')', Markup.inlineKeyboard([
+                bot.telegram.sendMessage(user.id, makeMessage(mas) , Markup.inlineKeyboard([
                     [Markup.button.url('باقي الاذكار', 'http://muzaker.github.io/?type=' + type)]])
-                )
+                ).then()
             }
         )
 
@@ -48,23 +53,6 @@ module.exports = {
     }
     ,
 
-    getApi() {
-
-        const prompt = require('prompt-sync')();
-
-        const fs = require('fs');
-
-        const api = prompt('What is your api bot? => ');
-
-        const content = 'BOT_TOKEN=' + api ;
-
-        fs.writeFile('./.env', content , err => {});
-
-        return api;
-
-    }
-    ,
-
     addUsers( db , ctx , bot ) {
 
         let {replayId , adminID} = require("./lib");
@@ -75,6 +63,7 @@ module.exports = {
             replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
         } else {
             db.push({id : chat.id});
+
             replayId(ctx, "تم اضافة المحادثة الى الارسال التلقائي");
 
             bot.telegram.sendMessage(adminID ,
@@ -116,10 +105,28 @@ and name is ${(chat.first_name + chat.last_name) || chat.title}
     ,
     async updateJson(ctx , db) {
         const axios = require('axios');
+        const {push} = require('./lib');
         const {file_id: fileId} = ctx.update.message.reply_to_message.document;
         const fileUrl = await ctx.telegram.getFileLink(fileId);
         const response = await axios.get(fileUrl.href);
-        db.save(response.data);
+        push(db , ...JSON.parse(response.data))
         return "";
     }
+    ,
+    Supporter() {
+        const supporter = {
+            "x0x3b": "xMan",
+        }
+        let text = "";
+        for (let support in supporter) {
+            text +=supporter[support] + " : @" + support + "\n"
+        }
+        return text
+    },
+    push(db , ...items) {
+        items.forEach(
+            item => db.push(item)
+        )
+    }
+
 }
