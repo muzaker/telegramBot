@@ -20,6 +20,14 @@ const git = require('git-pull-or-clone')
 // make vars
 let hDate = "";
 let ramadan = "";
+let about = `بوت عبود هو لنشر اذكار الصباح والمساء بشكل دوري في المجموعات 
+البوت مجاني تماما و مفتوح المصدر
+
+لذالك نروج منك دعمنا حتى نستمر
+    `;
+let reAbout = Markup.inlineKeyboard([
+    [Markup.button.callback("رجوع", "about")]
+]);
 const licenseUrl = "https://ojuba.org/waqf-2.0:%D8%B1%D8%AE%D8%B5%D8%A9_%D9%88%D9%82%D9%81_%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9";
 
 const buttons = Markup.inlineKeyboard([
@@ -35,11 +43,7 @@ const buttons = Markup.inlineKeyboard([
 
 bot.command("about", ctx => {
     if (ctx.message.chat.type !== 'supergroup') {
-        ctx.reply(`بوت عبود هو لنشر اذكار الصباح والمساء بشكل دوري في المجموعات 
-البوت مجاني تماما و مفتوح المصدر
-
-لذالك نروج منك دعمنا حتى نستمر
-    `, buttons);
+        ctx.reply(about, buttons);
     } else {
         ctx.reply("لاتعمل الرساله في المجموعات تواصل معي خاص" + " @" + bot.botInfo.username)
     }
@@ -47,13 +51,20 @@ bot.command("about", ctx => {
 
 bot.action("Supporter", ctx => {
     let keyBord = Markup.inlineKeyboard([
-        [Markup.button.callback("ادعمنا", "supportMe")]
+        [
+            Markup.button.callback("ادعمنا", "supportMe"),
+            Markup.button.callback("رجوع", "about")
+        ]
     ]);
     action(ctx, "الداعمين هم السبب الرائيسي في عمل البوت الخاص بنا وهم" + "\n\n" + Supporter(), keyBord)
 })
 
 bot.action("supportMe", ctx => {
-    action(ctx, "اذا كنت ترغب بدعمنا نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة \n مطور البوت : @superastorh")
+    action(ctx, "اذا كنت ترغب بدعمنا نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة \n مطور البوت : @superastorh"
+    , reAbout)
+})
+bot.action("about", ctx => {
+    action(ctx, about, buttons)
 })
 
 // when start chat on bot
