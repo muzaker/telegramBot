@@ -1,145 +1,138 @@
 module.exports = {
+  adminID: 635096382,
 
-    adminID: 635096382,
+  getRandomItem(arr) {
+    // get random index value
+    const randomIndex = Math.floor(Math.random() * arr.length);
 
-    getRandomItem(arr) {
+    // get random item and return it
+    return arr[randomIndex];
+  },
+  makeMessage(mas) {
+    let count =
+      mas.count === "1" || mas.count === ""
+        ? ""
+        : "\n\n" + mas.count + " مرات ";
 
-        // get random index value
-        const randomIndex = Math.floor(Math.random() * arr.length);
+    let reference = !mas.reference ? "" : "\n\n" + " رواة " + mas.reference;
 
-        // get random item and return it
-        return arr[randomIndex];
+    return (
+      "[ - " + mas.category + " - ]" + "\n\n" + mas.zekr + count + reference
+    );
+  },
+  sendAzkar(bot, type) {
+    const { getRandomItem, makeMessage, send } = require("./lib");
+    const jsonData = require("../db/azkar.json");
+    const { Markup } = require("telegraf");
 
-    }
-    ,
-    makeMessage(mas) {
-        let count = (mas.count === "1" || mas.count === "") ? "" : "\n\n" + mas.count + " مرات ";
+    let mas = getRandomItem(
+      Array.from(jsonData).filter((e) => e.category === type)
+    );
 
-        let reference = !mas.reference ? "" : "\n\n" + " رواة " + mas.reference;
-
-        return '[ - ' + mas.category + ' - ]' + "\n\n" + mas.zekr + count + reference;
-    }
-    ,
-    sendAzkar(bot, type) {
-
-        const {getRandomItem, makeMessage, send} = require("./lib");
-        const jsonData = require("../db/azkar.json");
-        const {Markup} = require('telegraf');
-
-        let mas = getRandomItem(Array.from(jsonData).filter(e => e.category === type));
-
-        send(
-            user => {
-                bot.telegram.sendMessage(user.id, makeMessage(mas), Markup.inlineKeyboard([
-                    [Markup.button.url('باقي الاذكار', 'http://muzaker.github.io/?type=' + type)]])
-                ).then()
-            }
+    send((user) => {
+      bot.telegram
+        .sendMessage(
+          user.id,
+          makeMessage(mas),
+          Markup.inlineKeyboard([
+            [
+              Markup.button.url(
+                "باقي الاذكار",
+                "http://muzaker.github.io/?type=" + type
+              ),
+            ],
+          ])
         )
+        .then();
+    });
+  },
+  send(fun) {
+    let users = require("../db/users.json");
 
-    }
-    ,
+    Array.from(users).forEach(fun);
+  },
+  replayId(ctx, txt) {
+    ctx.reply(txt, { reply_to_message_id: ctx.update.message.message_id });
+  },
+  addUsers(db, ctx, bot) {
+    let { replayId, adminID } = require("./lib");
 
-    send(fun) {
-        let users = require("../db/users.json");
+    let chat = ctx.chat;
 
-        Array.from(users).forEach(
-            fun
-        )
-    }
-    ,
+    if (db.find({ id: chat.id })) {
+      replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
+    } else {
+      db.push({ id: chat.id });
 
-    replayId(ctx, txt) {
-        ctx.reply(txt, {"reply_to_message_id": ctx.update.message.message_id});
-    }
-    ,
+      replayId(ctx, "تم اضافة المحادثة الى الارسال التلقائي");
 
-    addUsers(db, ctx, bot) {
-
-        let {replayId, adminID} = require("./lib");
-
-        let chat = ctx.chat;
-
-        if (db.find({id: chat.id})) {
-            replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
-        } else {
-            db.push({id: chat.id});
-
-            replayId(ctx, "تم اضافة المحادثة الى الارسال التلقائي");
-
-            bot.telegram.sendMessage(adminID,
-                `
+      bot.telegram.sendMessage(
+        adminID,
+        `
 I am add new user user name is @${chat.username} 
 and is ${chat.type}
-and name is ${(chat.first_name + chat.last_name) || chat.title}
+and name is ${chat.first_name + chat.last_name || chat.title}
                 `
-            );
+      );
 
-            bot.telegram.sendDocument(adminID, {source: "./db/users.json"}).then(
-                e=>{
-                    bot.telegram.pinChatMessage(adminID , e.message_id)
-                }
-            );
+      bot.telegram
+        .sendDocument(adminID, { source: "./db/users.json" })
+        .then((e) => {
+          bot.telegram.pinChatMessage(adminID, e.message_id);
+        });
+    }
+  },
 
-        }
-    },
+  removeUsers(db, ctx, bot) {
+    let { replayId, adminID } = require("./lib");
 
-    removeUsers(db, ctx, bot) {
+    let chat = ctx.chat;
 
-        let {replayId, adminID} = require("./lib");
+    if (!db.find({ id: chat.id })) {
+      replayId(ctx, "المحادثة غير مضافه في الارسال التلقائي");
+    } else {
+      db.filter({ id: chat.id }).delete();
+      replayId(ctx, "تم ايقاف الارسال التلقائي لهذه المحادثة");
 
-        let chat = ctx.chat;
-
-        if (!db.find({id: chat.id})) {
-            replayId(ctx, "المحادثة غير مضافه في الارسال التلقائي");
-        } else {
-            db.filter({id: chat.id}).delete();
-            replayId(ctx, "تم ايقاف الارسال التلقائي لهذه المحادثة");
-
-            bot.telegram.sendMessage(adminID,
-                `
+      bot.telegram.sendMessage(
+        adminID,
+        `
 I am remove user user name is @${chat.username} 
 and is ${chat.type}
-and name is ${(chat.first_name + chat.last_name) || chat.title}
+and name is ${chat.first_name + chat.last_name || chat.title}
                 `
-            );
+      );
 
-            bot.telegram.sendDocument(adminID, {source: "./db/users.json"});
-        }
+      bot.telegram.sendDocument(adminID, { source: "./db/users.json" });
     }
+  },
 
-    ,
-    async updateJson(ctx, db) {
-        const axios = require('axios');
-        const {push, removeSame} = require('./lib');
-        const {file_id: fileId} = ctx.update.message.reply_to_message.document;
-        const fileUrl = await ctx.telegram.getFileLink(fileId);
-        const response = await axios.get(fileUrl.href);
-        db.save(removeSame([...db.getAll(), ...response.data]))
-        return "";
+  async updateJson(ctx, db) {
+    const axios = require("axios");
+    const { push, removeSame } = require("./lib");
+    const { file_id: fileId } = ctx.update.message.reply_to_message.document;
+    const fileUrl = await ctx.telegram.getFileLink(fileId);
+    const response = await axios.get(fileUrl.href);
+    db.save(removeSame([...db.getAll(), ...response.data]));
+    return "";
+  },
+  Supporter() {
+    const supporter = {
+      x0x3b: "xMan",
+    };
+    let text = "";
+    for (let support in supporter) {
+      text += supporter[support] + " : @" + support + "\n";
     }
-    ,
-    Supporter() {
-        const supporter = {
-            "x0x3b": "xMan",
-        }
-        let text = "";
-        for (let support in supporter) {
-            text += supporter[support] + " : @" + support + "\n"
-        }
-        return text
-    },
-    push(db, ...items) {
-        items.forEach(
-            item => db.push(item)
-        )
-    },
+    return text;
+  },
+  push(db, ...items) {
+    items.forEach((item) => db.push(item));
+  },
 
-    removeSame(arr) {
-        return arr.filter((thing, index, self) =>
-            index === self.findIndex((t) => (
-                t.id === thing.id
-            ))
-        )
-    }
-
-}
+  removeSame(arr) {
+    return arr.filter(
+      (thing, index, self) => index === self.findIndex((t) => t.id === thing.id)
+    );
+  },
+};
