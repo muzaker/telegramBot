@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node main.js",
-    "bulid": "",
+    "prettier": "npx prettier --write .",
     "test": "node testfile.js"
   },
   "author": "",

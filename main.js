@@ -17,6 +17,7 @@ let {
   makeMessage,
   updateJson,
   Supporter,
+  ramadan,
   adminID,
 } = require("./src/lib");
 // import Json Data
@@ -27,7 +28,6 @@ require("dotenv").config();
 // make new bot
 const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 // make vars
-let ramadan = "";
 let sendActive = false;
 let about = `بوت عبود هو لنشر اذكار الصباح والمساء بشكل دوري في المجموعات 
 البوت مجاني تماما و مفتوح المصدر
@@ -110,21 +110,12 @@ bot.command("date", (ctx) => {
 });
 //get time
 bot.command("ramadan", (ctx) => {
-  ramadan = new Date(2021, 3, 13);
-
-  let difference = ramadan.getTime() - new Date().getTime();
-
-  let days = Math.ceil(difference / (1000 * 3600 * 24));
-
+  let days = ramadan();
+  
   let replay;
 
-  if (days > 0) {
-    replay = " يتبقى على شهر رمضان " + days + " يوم  تقريبا ";
-  } else if (days > -30) {
-    replay = "استغل رمضان الحالي فقد يعود ولاكن بدوننا";
-  } else {
-    replay = "نسئل الله لنا ولكم القبول لم تتم اضافة توقيت لرمضان القادم";
-  }
+  replay = " يتبقى على شهر رمضان " + days + " يوم  تقريبا ";
+
   replayId(ctx, replay);
 });
 
@@ -197,6 +188,7 @@ function start() {
 
 function stop(stop) {
   if (stop) bot.stop(stop);
+
   adminSend("تقفل بوت" + "\n @" + bot.botInfo.username);
 }
 
