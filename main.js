@@ -111,14 +111,10 @@ bot.command("ramadan", ctx => {
 // for admin command
 //send message to all users
 bot.action("send", ctx => {
-    action(ctx , "ارسل رسالتك الان " ,
+    action(ctx , 'ارسل رسالتك الان' ,
         Markup.forceReply()
     )
     sendActive = true;
-    /*
-    send(e => {
-        bot.telegram.sendMessage(e.id, ctx.message.reply_to_message.text)
-    });*/
 })
 //set json file for users
 bot.command("set", ctx => {
@@ -128,7 +124,7 @@ bot.command("set", ctx => {
         ).catch(
             err => {
                 ctx.reply("حصل خطاء")
-                console.log(err)
+                ctx.reply(err)
             }
         )
     }
@@ -155,13 +151,20 @@ bot.command("setting", ctx => {
 
 //get users
 bot.action("user", ctx => action(ctx, false, {}, {source: "./db/users.json"}))
+bot.action("okSend" , ctx =>{
+    action(ctx , false)
+    send(e => {
+        sendMessage(e.id, ctx.update.callback_query.message.text)
+    });
+})
 bot.on("text" , ctx =>{
     let reply_to_message = ctx.message.reply_to_message;
-    if (reply_to_message && reply_to_message.from.id === bot.botInfo.id && reply_to_message.text === "ارسل رسالتك الان " && sendActive) {
-        ctx.reply(ctx.message.text);
+    if (reply_to_message && reply_to_message.from.id === bot.botInfo.id && reply_to_message.text === 'ارسل رسالتك الان' && sendActive) {
+        ctx.reply(ctx.message.text , Markup.inlineKeyboard([
+            Markup.button.callback("ارسال" , "okSend")
+        ]));
         sendActive = false;
     }
-    console.log(reply_to_message , reply_to_message.from.id === bot.botInfo.id , reply_to_message.text , sendActive)
 })
 
 //send when bot start

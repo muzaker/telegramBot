@@ -1,6 +1,6 @@
 module.exports = {
 
-    adminID : 635096382,
+    adminID: 635096382,
 
     getRandomItem(arr) {
 
@@ -12,17 +12,17 @@ module.exports = {
 
     }
     ,
-    makeMessage(mas){
+    makeMessage(mas) {
         let count = (mas.count === "1" || mas.count === "") ? "" : "\n\n" + mas.count + " مرات ";
 
         let reference = !mas.reference ? "" : "\n\n" + " رواة " + mas.reference;
 
-        return  '[ - ' + mas.category + ' - ]'+ "\n\n" + mas.zekr +  count + reference;
+        return '[ - ' + mas.category + ' - ]' + "\n\n" + mas.zekr + count + reference;
     }
     ,
     sendAzkar(bot, type) {
 
-        const {getRandomItem , makeMessage, send} = require("./lib");
+        const {getRandomItem, makeMessage, send} = require("./lib");
         const jsonData = require("../db/azkar.json");
         const {Markup} = require('telegraf');
 
@@ -30,7 +30,7 @@ module.exports = {
 
         send(
             user => {
-                bot.telegram.sendMessage(user.id, makeMessage(mas) , Markup.inlineKeyboard([
+                bot.telegram.sendMessage(user.id, makeMessage(mas), Markup.inlineKeyboard([
                     [Markup.button.url('باقي الاذكار', 'http://muzaker.github.io/?type=' + type)]])
                 ).then()
             }
@@ -53,20 +53,20 @@ module.exports = {
     }
     ,
 
-    addUsers( db , ctx , bot ) {
+    addUsers(db, ctx, bot) {
 
-        let {replayId , adminID} = require("./lib");
+        let {replayId, adminID} = require("./lib");
 
         let chat = ctx.chat;
 
         if (db.find({id: chat.id})) {
             replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
         } else {
-            db.push({id : chat.id});
+            db.push({id: chat.id});
 
             replayId(ctx, "تم اضافة المحادثة الى الارسال التلقائي");
 
-            bot.telegram.sendMessage(adminID ,
+            bot.telegram.sendMessage(adminID,
                 `
 I am add new user user name is @${chat.username} 
 and is ${chat.type}
@@ -74,20 +74,25 @@ and name is ${(chat.first_name + chat.last_name) || chat.title}
                 `
             );
 
-            bot.telegram.sendDocument(adminID , {source: "./db/users.json"});
+            bot.telegram.sendDocument(adminID, {source: "./db/users.json"}).then(
+                e=>{
+                    bot.telegram.pinChatMessage(adminID , e.message_id)
+                }
+            );
+
         }
     },
 
-    removeUsers( db , ctx , bot ) {
+    removeUsers(db, ctx, bot) {
 
-        let {replayId , adminID} = require("./lib");
+        let {replayId, adminID} = require("./lib");
 
         let chat = ctx.chat;
 
         if (!db.find({id: chat.id})) {
             replayId(ctx, "المحادثة غير مضافه في الارسال التلقائي");
         } else {
-            db.filter({id : chat.id}).delete();
+            db.filter({id: chat.id}).delete();
             replayId(ctx, "تم ايقاف الارسال التلقائي لهذه المحادثة");
 
             bot.telegram.sendMessage(adminID,
@@ -98,18 +103,18 @@ and name is ${(chat.first_name + chat.last_name) || chat.title}
                 `
             );
 
-            bot.telegram.sendDocument(adminID , {source: "./db/users.json"});
+            bot.telegram.sendDocument(adminID, {source: "./db/users.json"});
         }
     }
 
     ,
-    async updateJson(ctx , db) {
+    async updateJson(ctx, db) {
         const axios = require('axios');
-        const {push} = require('./lib');
+        const {push, removeSame} = require('./lib');
         const {file_id: fileId} = ctx.update.message.reply_to_message.document;
         const fileUrl = await ctx.telegram.getFileLink(fileId);
         const response = await axios.get(fileUrl.href);
-        push(db , ...response.data)
+        db.save(removeSame([...db.getAll(), ...response.data]))
         return "";
     }
     ,
@@ -119,13 +124,21 @@ and name is ${(chat.first_name + chat.last_name) || chat.title}
         }
         let text = "";
         for (let support in supporter) {
-            text +=supporter[support] + " : @" + support + "\n"
+            text += supporter[support] + " : @" + support + "\n"
         }
         return text
     },
-    push(db , ...items) {
+    push(db, ...items) {
         items.forEach(
             item => db.push(item)
+        )
+    },
+
+    removeSame(arr) {
+        return arr.filter((thing, index, self) =>
+            index === self.findIndex((t) => (
+                t.id === thing.id
+            ))
         )
     }
 

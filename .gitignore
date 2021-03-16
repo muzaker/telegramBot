@@ -5,3 +5,5 @@ test.js
 testfile.js
 .env
 users.json
+build
+coverage
