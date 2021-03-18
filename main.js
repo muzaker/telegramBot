@@ -19,6 +19,7 @@ let {
   Supporter,
   ramadan,
   adminID,
+  Hijri
 } = require("./src/lib");
 // import Json Data
 let jsonData = require("./db/azkar.json");
@@ -31,7 +32,6 @@ const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 let sendActive = false;
 let about = `بوت عبود هو لنشر اذكار الصباح والمساء بشكل دوري في المجموعات 
 البوت مجاني تماما و مفتوح المصدر
-
 لذالك نروج منك دعمنا حتى نستمر
     `;
 let reAbout = Markup.inlineKeyboard([
@@ -39,7 +39,7 @@ let reAbout = Markup.inlineKeyboard([
 ]);
 
 const licenseUrl =
-  "https://ojuba.org/waqf-2.0:%D8%B1%D8%AE%D8%B5%D8%A9_%D9%88%D9%82%D9%81_%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9";
+    "https://ojuba.org/waqf-2.0:%D8%B1%D8%AE%D8%B5%D8%A9_%D9%88%D9%82%D9%81_%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9";
 
 const buttons = Markup.inlineKeyboard([
   [
@@ -57,7 +57,7 @@ bot.command("about", (ctx) => {
     ctx.reply(about, buttons);
   } else {
     ctx.reply(
-      "لاتعمل الرساله في المجموعات تواصل معي خاص" + " @" + bot.botInfo.username
+        "لاتعمل الرساله في المجموعات تواصل معي خاص" + " @" + bot.botInfo.username
     );
   }
 });
@@ -70,19 +70,19 @@ bot.action("Supporter", (ctx) => {
     ],
   ]);
   action(
-    ctx,
-    "الداعمين هم السبب الرائيسي في عمل البوت الخاص بنا وهم" +
+      ctx,
+      "الداعمين هم السبب الرائيسي في عمل البوت الخاص بنا وهم" +
       "\n\n" +
       Supporter(),
-    keyBord
+      keyBord
   );
 });
 
 bot.action("supportMe", (ctx) => {
   action(
-    ctx,
-    "اذا كنت ترغب بدعمنا نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة \n مطور البوت : @superastorh",
-    reAbout
+      ctx,
+      "اذا كنت ترغب بدعمنا نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة \n مطور البوت : @superastorh",
+      reAbout
   );
 });
 
@@ -131,34 +131,34 @@ bot.action("send", (ctx) => {
 //set json file for users
 bot.command("set", (ctx) => {
   if (
-    ctx.message.reply_to_message &&
-    ctx.chat.id === 635096382 &&
-    ctx.message.reply_to_message.document
+      ctx.message.reply_to_message &&
+      ctx.chat.id === 635096382 &&
+      ctx.message.reply_to_message.document
   ) {
     updateJson(ctx, db)
-      .then(() => ctx.reply("تم بنجاح"))
-      .catch((err) => {
-        ctx.reply("حصل خطاء");
-        ctx.reply(err);
-      });
+        .then(() => ctx.reply("تم بنجاح"))
+        .catch((err) => {
+          ctx.reply("حصل خطاء");
+          ctx.reply(err);
+        });
   }
 });
 //update h date
 bot.command("setting", (ctx) => {
   if (ctx.chat.id === adminID) {
     ctx.reply(
-      "اهلا بك ايها المشرف",
-      Markup.inlineKeyboard([
-        [Markup.button.callback("قاعدة المستخدمين", "user")],
-        [Markup.button.callback("ارسال", "send")],
-      ])
+        "اهلا بك ايها المشرف",
+        Markup.inlineKeyboard([
+          [Markup.button.callback("قاعدة المستخدمين", "user")],
+          [Markup.button.callback("ارسال", "send")],
+        ])
     );
   }
 });
 
 //get users
 bot.action("user", (ctx) =>
-  action(ctx, false, {}, { source: "./db/users.json" })
+    action(ctx, false, {}, { source: "./db/users.json" })
 );
 bot.action("okSend", (ctx) => {
   action(ctx, false);
@@ -169,14 +169,14 @@ bot.action("okSend", (ctx) => {
 bot.on("text", (ctx) => {
   let reply_to_message = ctx.message.reply_to_message;
   if (
-    reply_to_message &&
-    reply_to_message.from.id === bot.botInfo.id &&
-    reply_to_message.text === "ارسل رسالتك الان" &&
-    sendActive
+      reply_to_message &&
+      reply_to_message.from.id === bot.botInfo.id &&
+      reply_to_message.text === "ارسل رسالتك الان" &&
+      sendActive
   ) {
     ctx.reply(
-      ctx.message.text,
-      Markup.inlineKeyboard([Markup.button.callback("ارسال", "okSend")])
+        ctx.message.text,
+        Markup.inlineKeyboard([Markup.button.callback("ارسال", "okSend")])
     );
     sendActive = false;
   }
@@ -205,63 +205,30 @@ const options = {
 };
 
 cron.schedule(
-  "0 7,13 * * *",
-  () => {
-    sendAzkar(bot, "أذكار الصباح");
-  },
-  options
+    "0 7,13 * * *",
+    () => {
+      sendAzkar(bot, "أذكار الصباح");
+    },
+    options
 );
 
 cron.schedule(
-  "0 17,19 * * *",
-  () => {
-    sendAzkar(bot, "أذكار المساء");
-  },
-  options
+    "0 17,19 * * *",
+    () => {
+      sendAzkar(bot, "أذكار المساء");
+    },
+    options
 );
 
 cron.schedule(
-  "0 9 * * 5",
-  () => {
-    send((e) => {
-      sendMessage(e.id, getRandomItem(require("./db/friDay.json")).zekr);
-    });
-  },
-  options
+    "0 9 * * 5",
+    () => {
+      send((e) => {
+        sendMessage(e.id, getRandomItem(require("./db/friDay.json")).zekr);
+      });
+    },
+    options
 );
-
-function Hijri() {
-  let Hijri = new HijriDate();
-
-  let days = [
-    "الاحد",
-    "الاثنين",
-    "الثلاثاء",
-    "الاربعاء",
-    "الخميس",
-    "الجمعة",
-    "السبت",
-  ];
-
-  let mo = [
-    "مُحرَّم",
-    "صفَر",
-    "ربيعالأول",
-    "ربيعالآخر",
-    "جماديالأول",
-    "جماديالآخر",
-    "رَجب",
-    "شَعبان",
-    "رَمضان",
-    "شوّال",
-    "ذوالقِعدة",
-    "ذوالحِجّة",
-  ];
-
-  return `${days[Hijri.day]} ${Hijri.date} ${mo[Hijri.month - 1]} ${
-    Hijri.year
-  }`;
-}
 
 function adminSend(txt) {
   sendMessage(adminID, txt);

@@ -116,16 +116,6 @@ and name is ${chat.first_name + chat.last_name || chat.title}
     db.save(removeSame([...db.getAll(), ...response.data]));
     return "";
   },
-  Supporter() {
-    const supporter = {
-      x0x3b: "xMan",
-    };
-    let text = "";
-    for (let support in supporter) {
-      text += supporter[support] + " : @" + support + "\n";
-    }
-    return text;
-  },
   push(db, ...items) {
     items.forEach((item) => db.push(item));
   },
@@ -152,5 +142,39 @@ and name is ${chat.first_name + chat.last_name || chat.title}
         year++;
       }
     }
+  },
+  Hijri() {
+    require("hijri-date");
+
+    let Hijri = new HijriDate();
+
+    let days = [
+      "الاحد",
+      "الاثنين",
+      "الثلاثاء",
+      "الاربعاء",
+      "الخميس",
+      "الجمعة",
+      "السبت",
+    ];
+
+    let mo = [
+      "مُحرَّم",
+      "صفَر",
+      "ربيعالأول",
+      "ربيعالآخر",
+      "جماديالأول",
+      "جماديالآخر",
+      "رَجب",
+      "شَعبان",
+      "رَمضان",
+      "شوّال",
+      "ذوالقِعدة",
+      "ذوالحِجّة",
+    ];
+
+    return `${days[Hijri.day]} ${Hijri.date} ${mo[Hijri.month - 1]} ${
+      Hijri.year
+    }`;
   },
 };
