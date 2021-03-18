@@ -18,7 +18,7 @@ or with yarn:
 yarn add
 ```
 
-#how run
+## how run
 
 ```bash
 npm start
