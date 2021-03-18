@@ -111,11 +111,14 @@ bot.command("date", (ctx) => {
 //get time
 bot.command("ramadan", (ctx) => {
   let days = ramadan();
-  
+
   let replay;
 
-  replay = " يتبقى على شهر رمضان " + days + " يوم  تقريبا ";
-
+  if (new HijriDate().month !== 9) {
+    replay = " يتبقى على شهر رمضان " + days + " يوم  تقريبا ";
+  } else {
+    replay = "استغل رمضان الحالي فقد يعود ولاكن بدوننا";
+  }
   replayId(ctx, replay);
 });
 

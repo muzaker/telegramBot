@@ -135,22 +135,22 @@ and name is ${chat.first_name + chat.last_name || chat.title}
       (thing, index, self) => index === self.findIndex((t) => t.id === thing.id)
     );
   },
-  ramadan(){
+  ramadan() {
     require("hijri-date");
 
     let year = new HijriDate().year;
 
     let w = true;
 
-    let date = ()=> new HijriDate(year, 9, 1) - new HijriDate();
-    while (w){
-      if (date() > 0){
+    let date = () => new HijriDate(year, 9, 1) - new HijriDate();
+    while (w) {
+      if (date() > 0) {
         w = false;
         let difference = date();
         return Math.ceil(difference / (1000 * 3600 * 24));
-      }else {
+      } else {
         year++;
       }
     }
-  }
+  },
 };
