@@ -80,7 +80,7 @@ bot.action("Supporter", (ctx) => {
 });
 bot.action("myBots", (ctx) => {
   let keyBord = Markup.inlineKeyboard([
-    [Markup.button.url("بوت عبود للشاي", "https://t.me/muzakerBot")],
+    [Markup.button.url("بوت عبود للشاي", "https://t.me/artea_bot")],
     [
       Markup.button.callback("ادعمنا", "supportMe"),
       Markup.button.callback("رجوع", "about"),
