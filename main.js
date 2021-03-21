@@ -90,10 +90,18 @@ bot.action("myBots", (ctx) => {
 });
 
 bot.action("supportMe", (ctx) => {
+  let keyBord = Markup.inlineKeyboard([
+    [
+      Markup.button.url("باتريون", "https://www.patreon.com/superastorh"),
+      Markup.button.callback("رجوع", "about"),
+    ],
+  ]);
   action(
     ctx,
-    "اذا كنت ترغب بدعمنا نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة \n مطور البوت : @superastorh",
-    back
+    "نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة  \n" +
+      "مطور البوت : @superastorh\n" +
+      "او دعمنا على احد المنصات التاليه",
+      keyBord
   );
 });
 
