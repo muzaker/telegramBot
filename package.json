@@ -17,7 +17,7 @@
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.1",
     "prompt-sync": "^4.2.0",
-    "ranidb": "https://github.com/waseeld/ranidb/tarball/master",
+    "ranidb": "^0.0.71",
     "telegraf": "^4.2.1"
   },
   "devDependencies": {
