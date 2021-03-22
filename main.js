@@ -16,11 +16,11 @@ let {
   replayId,
   makeMessage,
   updateJson,
-  Supporter,
   ramadan,
   adminID,
   Hijri,
 } = require("./src/lib");
+let { about, init , action} = require("./src/about");
 // import Json Data
 let jsonData = require("./db/azkar.json");
 const db = new ranidb("./db/users.json", { idType: "empty" });
@@ -30,87 +30,25 @@ require("dotenv").config();
 const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 // make vars
 let sendActive = false;
-let about = `بوت مذكر هو لنشر اذكار الصباح والمساء بشكل دوري في المجموعات 
-البوت مجاني تماما و مفتوح المصدر
-لذالك نروج منك دعمنا حتى نستمر
-    `;
-let back = Markup.inlineKeyboard([
-  [Markup.button.callback("رجوع", "about")],
-]);
 
-const licenseUrl =
-  "https://ojuba.org/waqf-2.0:%D8%B1%D8%AE%D8%B5%D8%A9_%D9%88%D9%82%D9%81_%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9";
+action = action.bind( { bot } )
 
-const buttons = Markup.inlineKeyboard([
-  [
-    Markup.button.url("المطور", "https://t.me/superastorh"),
-    Markup.button.url("الرخصة", licenseUrl),
-  ],
-  [
-    Markup.button.callback("ادعمنا", "supportMe"),
-    Markup.button.callback("الداعمين", "Supporter"),
-  ],
-  [Markup.button.callback("بوتات اخرى من صنعنا", "myBots")],
-]);
+// when start chat on bot
+bot.start((ctx) => {
+  addUsers(db, ctx, bot);
+});
+
+init(bot);
 
 bot.command("about", (ctx) => {
   if (ctx.message.chat.type !== "supergroup") {
-    ctx.reply(about, buttons);
+    ctx.reply(...about());
   } else {
     ctx.reply(
       "لاتعمل الرساله في المجموعات تواصل معي خاص" + " @" + bot.botInfo.username
     );
   }
 });
-
-bot.action("Supporter", (ctx) => {
-  let keyBord = Markup.inlineKeyboard([
-    [
-      Markup.button.callback("ادعمنا", "supportMe"),
-      Markup.button.callback("رجوع", "about"),
-    ],
-  ]);
-  action(
-    ctx,
-    "الداعمين هم السبب الرائيسي في عمل البوت الخاص بنا وهم" +
-      "\n\n" +
-      Supporter(),
-    keyBord
-  );
-});
-bot.action("myBots", (ctx) => {
-  let keyBord = Markup.inlineKeyboard([
-    [Markup.button.url("بوت عبود للشاي", "https://t.me/artea_bot")],
-    [
-      Markup.button.callback("ادعمنا", "supportMe"),
-      Markup.button.callback("رجوع", "about"),
-    ],
-  ]);
-  action(ctx, "البوتات الاخرى التي تم صنعناها وهي من تطوير @superastorh", keyBord);
-});
-
-bot.action("supportMe", (ctx) => {
-  let keyBord = Markup.inlineKeyboard([
-    [
-      Markup.button.url("باتريون", "https://www.patreon.com/superastorh"),
-      Markup.button.callback("رجوع", "about"),
-    ],
-  ]);
-  action(
-    ctx,
-    "نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة  \n" +
-      "مطور البوت : @superastorh\n" +
-      "او دعمنا على احد المنصات التاليه",
-      keyBord
-  );
-});
-
-bot.action("about", (ctx) => {
-  action(ctx, about, buttons);
-});
-
-// when start chat on bot
-bot.start((ctx) => addUsers(db, ctx, bot));
 // when some one need bot start in this chat
 bot.command("on", (ctx) => {
   addUsers(db, ctx, bot);
@@ -118,6 +56,7 @@ bot.command("on", (ctx) => {
 // when some one need bot stop in this chat
 bot.command("off", (ctx) => removeUsers(db, ctx, bot));
 //get new Message
+about();
 bot.command("new", (ctx) => {
   let mas = getRandomItem(jsonData);
 
@@ -141,7 +80,7 @@ bot.command("ramadan", (ctx) => {
   replayId(ctx, replay);
 });
 
-// for admin command
+/* for admin command */
 //send message to all users
 bot.action("send", (ctx) => {
   action(ctx, "ارسل رسالتك الان", Markup.forceReply());
@@ -162,6 +101,19 @@ bot.command("set", (ctx) => {
       });
   }
 });
+/* coming soon
+//zaker
+bot.command("zkr" , ctx=>{
+  if (db.find({id : ctx.from.id})) ctx.reply("انت مسجل معنا");
+  console.log(!!db.find(ctx.from.id))
+  let morning = require("./db/azkar.json").filter(e=> e.category = "أذكار الصباح")
+  ctx.reply(morning[0].zekr , Markup.inlineKeyboard(
+      [
+          Markup.button.callback("التالي" , "next")
+      ]
+  ))
+})
+*/
 //update h date
 bot.command("setting", (ctx) => {
   if (ctx.chat.id === adminID) {
@@ -251,18 +203,6 @@ cron.schedule(
 
 function adminSend(txt) {
   sendMessage(adminID, txt);
-}
-
-function action(ctx, message, extra = {}, doc) {
-  let chat = ctx.update.callback_query.message.chat.id;
-  let messageId = ctx.update.callback_query.message.message_id;
-  deleteMessage(chat, messageId);
-  if (message) sendMessage(chat, message, extra);
-  if (doc) bot.telegram.sendDocument(chat, doc).then();
-}
-
-function deleteMessage(chat_id, message_id) {
-  bot.telegram.deleteMessage(chat_id, message_id).then();
 }
 
 function sendMessage(chatId, text, extra = {}) {

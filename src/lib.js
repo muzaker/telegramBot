@@ -143,16 +143,7 @@ and name is ${chat.first_name + chat.last_name || chat.title}
       }
     }
   },
-  Supporter() {
-    const supporter = {
-      x0x3b: "xMan",
-    };
-    let text = "";
-    for (let support in supporter) {
-      text += supporter[support] + " : @" + support + "\n";
-    }
-    return text;
-  },
+
   Hijri() {
     require("hijri-date");
 
