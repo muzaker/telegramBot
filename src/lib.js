@@ -22,9 +22,8 @@ module.exports = {
   },
   sendAzkar(bot, type) {
     const { getRandomItem, makeMessage, send } = require("./lib");
-    const jsonData = require("../db/azkar.json");
+    let jsonData = require("../db/azkar.json");
     const { Markup } = require("telegraf");
-
     let mas = getRandomItem(
       Array.from(jsonData).filter((e) => e.category === type)
     );
@@ -47,8 +46,8 @@ module.exports = {
     });
   },
   send(fun) {
-    let users = require("../db/users.json");
-
+    let ranidb = require("ranidb");
+    let users = new ranidb("./db/users.json").getAll();
     Array.from(users).forEach(fun);
   },
   replayId(ctx, txt) {

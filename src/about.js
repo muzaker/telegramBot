@@ -45,12 +45,12 @@ module.exports = {
           Markup.button.callback("رجوع", "about"),
         ],
       ]);
-      let text  =
+      let text =
         "نرجو منك التواصل مع مطور البوت لمعرفة التفاضيل الازمة\n" +
         "مطور البوت : @superastorh\n" +
         "او دعمنا على احد المنصات التاليه";
 
-      action(ctx , text , keyBord);
+      action(ctx, text, keyBord);
     });
 
     bot.action("about", (ctx) => {

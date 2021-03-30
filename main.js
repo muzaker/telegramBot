@@ -20,7 +20,7 @@ let {
   adminID,
   Hijri,
 } = require("./src/lib");
-let { about, init , action} = require("./src/about");
+let { about, init, action } = require("./src/about");
 // import Json Data
 let jsonData = require("./db/azkar.json");
 const db = new ranidb("./db/users.json", { idType: "empty" });
@@ -31,11 +31,37 @@ const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 // make vars
 let sendActive = false;
 
-action = action.bind( { bot } )
+
+bot.use(function(ctx, next){
+  /// or other chat types...
+  if( ctx.chat.id > 0 ) return next();
+  /// need to cache this result ( variable or session or ....)
+  /// because u don't need to call this method
+  /// every message
+  return bot.telegram.getChatAdministrators(ctx.chat.id)
+      .then(function(data){
+        if( !data || !data.length ) return;
+        ctx.chat._admins = data;
+        ctx.from.isAdmin = data.some( adm => adm.user.id === ctx.from.id );
+      })
+      .catch(console.log)
+      .then(_ => next(ctx));
+});
+
+function admins(ctx , callBack){
+  if (ctx.from.isAdmin || ctx.chat.type === "private"){
+    callBack()
+  }else {
+    ctx.reply("هذا امر مخصص للمشرفين")
+  }
+}
+
+
+action = action.bind({ bot });
 
 // when start chat on bot
 bot.start((ctx) => {
-  addUsers(db, ctx, bot);
+  admins(ctx , e=> addUsers(db, ctx, bot) );
 });
 
 init(bot);
@@ -51,10 +77,12 @@ bot.command("about", (ctx) => {
 });
 // when some one need bot start in this chat
 bot.command("on", (ctx) => {
-  addUsers(db, ctx, bot);
+  admins(ctx , e=> addUsers(db, ctx, bot) );
 });
 // when some one need bot stop in this chat
-bot.command("off", (ctx) => removeUsers(db, ctx, bot));
+bot.command("off", (ctx) => {
+  admins(ctx , e=> addUsers(db, ctx, bot) );
+});
 //get new Message
 about();
 bot.command("new", (ctx) => {
@@ -101,19 +129,20 @@ bot.command("set", (ctx) => {
       });
   }
 });
-/* coming soon
 //zaker
-bot.command("zkr" , ctx=>{
-  if (db.find({id : ctx.from.id})) ctx.reply("انت مسجل معنا");
-  console.log(!!db.find(ctx.from.id))
-  let morning = require("./db/azkar.json").filter(e=> e.category = "أذكار الصباح")
-  ctx.reply(morning[0].zekr , Markup.inlineKeyboard(
-      [
-          Markup.button.callback("التالي" , "next")
-      ]
-  ))
-})
+/*
+bot.command("zkr", (ctx) => {
+  if (db.find({ id: ctx.from.id })) ctx.reply("انت مسجل معنا");
+  let morning = require("./db/azkar.json").filter(
+    (e) => (e.category = "أذكار الصباح")
+  );
+  ctx.reply(
+    morning[0].zekr,
+    Markup.inlineKeyboard([Markup.button.callback("التالي", "next")])
+  );
+});
 */
+
 //update h date
 bot.command("setting", (ctx) => {
   if (ctx.chat.id === adminID) {
@@ -176,7 +205,7 @@ const options = {
 };
 
 cron.schedule(
-  "0 7,13 * * *",
+    "0 7,13 * * *",
   () => {
     sendAzkar(bot, "أذكار الصباح");
   },
