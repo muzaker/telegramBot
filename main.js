@@ -124,7 +124,7 @@ bot.command("set", (ctx) => {
     updateJson(ctx, db)
       .then(() => ctx.reply("تم بنجاح"))
       .catch((err) => {
-        ctx.reply("حصل خطاء");
+        ctx.reply("حصل خطأ");
         ctx.reply(err);
       });
   }
