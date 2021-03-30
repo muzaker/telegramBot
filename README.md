@@ -1,5 +1,7 @@
 # AzkarBOT
 
+![logo](https://github.com/muzaker/telegramBot/raw/main/logo.jpg)
+
 > A simple Bot telgram to azkar.
 
 ## Installation
