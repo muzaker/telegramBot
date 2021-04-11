@@ -6,7 +6,7 @@
 
 ## Installation
 
-Add `AzkarBOT` to your host.
+Add `muzakerBOT` to your host.
 
 with npm :
 
