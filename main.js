@@ -81,7 +81,7 @@ bot.command("on", (ctx) => {
 });
 // when some one need bot stop in this chat
 bot.command("off", (ctx) => {
-  admins(ctx , e=> addUsers(db, ctx, bot) );
+  admins(ctx , e=> removeUsers(db, ctx, bot) );
 });
 //get new Message
 about();
