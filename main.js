@@ -137,12 +137,12 @@ bot.command("update", (ctx) => {
   async function command(command) {
     try {
       const { stdout, stderr } = await exec(command);
-      await ctx.reply(stderr || stdout);
+      await ctx.reply("Error () \n" + stderr + "\n result () \n" + stdout);
     } catch (err) {
-      await ctx.reply(err);
+      await ctx.reply("catch () \n" + err);
     }
   }
-  command("git pull").then(() => command("pm2 reload main.js"));
+  command("git pull").then(() => command("pm2 restart main.js"));
 });
 //zaker
 /*
