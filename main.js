@@ -31,37 +31,36 @@ const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 // make vars
 let sendActive = false;
 
-
-bot.use(function(ctx, next){
+bot.use(function (ctx, next) {
   /// or other chat types...
-  if( ctx.chat.id > 0 ) return next();
+  if (ctx.chat.id > 0) return next();
   /// need to cache this result ( variable or session or ....)
   /// because u don't need to call this method
   /// every message
-  return bot.telegram.getChatAdministrators(ctx.chat.id)
-      .then(function(data){
-        if( !data || !data.length ) return;
-        ctx.chat._admins = data;
-        ctx.from.isAdmin = data.some( adm => adm.user.id === ctx.from.id );
-      })
-      .catch(console.log)
-      .then(_ => next(ctx));
+  return bot.telegram
+    .getChatAdministrators(ctx.chat.id)
+    .then(function (data) {
+      if (!data || !data.length) return;
+      ctx.chat._admins = data;
+      ctx.from.isAdmin = data.some((adm) => adm.user.id === ctx.from.id);
+    })
+    .catch(console.log)
+    .then((_) => next(ctx));
 });
 
-function admins(ctx , callBack){
-  if (ctx.from.isAdmin || ctx.chat.type === "private"){
-    callBack()
-  }else {
-    ctx.reply("هذا امر مخصص للمشرفين")
+function admins(ctx, callBack) {
+  if (ctx.from.isAdmin || ctx.chat.type === "private") {
+    callBack();
+  } else {
+    ctx.reply("هذا امر مخصص للمشرفين");
   }
 }
-
 
 action = action.bind({ bot });
 
 // when start chat on bot
 bot.start((ctx) => {
-  admins(ctx , e=> addUsers(db, ctx, bot) );
+  admins(ctx, (e) => addUsers(db, ctx, bot));
 });
 
 init(bot);
@@ -77,11 +76,11 @@ bot.command("about", (ctx) => {
 });
 // when some one need bot start in this chat
 bot.command("on", (ctx) => {
-  admins(ctx , e=> addUsers(db, ctx, bot) );
+  admins(ctx, (e) => addUsers(db, ctx, bot));
 });
 // when some one need bot stop in this chat
 bot.command("off", (ctx) => {
-  admins(ctx , e=> removeUsers(db, ctx, bot) );
+  admins(ctx, (e) => removeUsers(db, ctx, bot));
 });
 //get new Message
 about();
@@ -128,6 +127,22 @@ bot.command("set", (ctx) => {
         ctx.reply(err);
       });
   }
+});
+
+bot.command("update", (ctx) => {
+  if (!ctx.chat.id === adminID) return;
+  const util = require("util");
+  const exec = util.promisify(require("child_process").exec);
+
+  async function command(command) {
+    try {
+      const { stdout, stderr } = await exec(command);
+      await ctx.reply(stderr || stdout);
+    } catch (err) {
+      await ctx.reply(err);
+    }
+  }
+  command("git pull").then(() => command("pm2 reload main.js"));
 });
 //zaker
 /*
@@ -205,7 +220,7 @@ const options = {
 };
 
 cron.schedule(
-    "0 7,13 * * *",
+  "0 7,13 * * *",
   () => {
     sendAzkar(bot, "أذكار الصباح");
   },
