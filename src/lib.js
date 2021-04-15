@@ -63,14 +63,20 @@ module.exports = {
     } else {
       db.push({ id: chat.id });
 
-      replayId(ctx, "تم اضافة المحادثة الى الارسال التلقائي");
+      replayId(
+        ctx,
+        "مرحبا بك سيتم تشغيل هذا البوت هنا الان و الذي يقوم بارسال ذكر اربع مرت في اليوم" +
+          "\n" +
+          "يمكنكم ايقاف خدمة الارسال التلقائي عن طريقة الامر /off والاستفادة من المميزات الاخرى التي يقدمها البوت دون مشاكل"
+      );
 
       bot.telegram.sendMessage(
         adminID,
         `
 I am add new user user name is @${chat.username} 
 and is ${chat.type}
-and name is ${chat.first_name + chat.last_name || chat.title}
+and name is ${chat.first_name + (chat.last_name || "") || chat.title}
+and id is ${chat.id}
                 `
       );
 
@@ -91,14 +97,20 @@ and name is ${chat.first_name + chat.last_name || chat.title}
       replayId(ctx, "المحادثة غير مضافه في الارسال التلقائي");
     } else {
       db.filter({ id: chat.id }).delete();
-      replayId(ctx, "تم ايقاف الارسال التلقائي لهذه المحادثة");
+      replayId(
+        ctx,
+        "تم ايقاف الارسال التلقائي لهذه المحادثة" +
+          "\n" +
+          " من اجل اعادة استعمال الارسال التلقائي في البوت استخدم الامر /off"
+      );
 
       bot.telegram.sendMessage(
         adminID,
         `
 I am remove user user name is @${chat.username} 
 and is ${chat.type}
-and name is ${chat.first_name + chat.last_name || chat.title}
+and name is ${chat.first_name + (chat.last_name || "") || chat.title}
+and id is ${chat.id}
                 `
       );
 

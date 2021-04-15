@@ -144,6 +144,12 @@ bot.command("update", (ctx) => {
   }
   command("git pull").then(() => command("pm2 restart main.js"));
 });
+
+bot.on("new_chat_members", (ctx) => {
+  if (!ctx.message.new_chat_members.username === bot.botInfo.username) return;
+  addUsers(db, ctx, bot);
+});
+
 //zaker
 /*
 bot.command("zkr", (ctx) => {
