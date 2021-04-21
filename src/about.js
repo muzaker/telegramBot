@@ -62,7 +62,12 @@ module.exports = {
     const bot = this.bot;
     let chat = ctx.update.callback_query.message.chat.id;
     let messageId = ctx.update.callback_query.message.message_id;
-    await bot.telegram.deleteMessage(chat, messageId)
+    try {
+      await bot.telegram.deleteMessage(chat, messageId);
+    }
+    catch(e){
+      
+    }
     if (message) await bot.telegram.sendMessage(chat, message, extra)
     if (doc) await bot.telegram.sendDocument(chat, doc)
   },

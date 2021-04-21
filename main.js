@@ -203,7 +203,8 @@ bot.on("text", (ctx) => {
     reply_to_message.text === "ارسل رسالتك الان" &&
     sendActive
   ) {
-    ctx.reply(
+    bot.telegram.sendMessage(
+      adminID,
       ctx.message.text,
       Markup.inlineKeyboard([Markup.button.callback("ارسال", "okSend")])
     );
