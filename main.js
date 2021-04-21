@@ -47,10 +47,7 @@ bot.use(function (ctx, next) {
     .catch(console.log)
     .then((_) => next(ctx));
 });
-let owner = [
-  'FLOSSit',
-  'x0x3b'
-]
+let owner = ["FLOSSit", "x0x3b"];
 function admins(ctx, callBack) {
   if (ctx.from.isAdmin || ctx.chat.type === "private") {
     callBack();
@@ -117,7 +114,7 @@ bot.action("send", (ctx) => {
   sendActive = true;
 });
 bot.action("userLength", (ctx) => {
-  action(ctx, 'عدد المستخدمين هم \n' + db.getAll().length);
+  action(ctx, "عدد المستخدمين هم \n" + db.getAll().length);
 });
 //set json file for users
 bot.command("set", (ctx) => {
@@ -143,9 +140,12 @@ bot.command("update", (ctx) => {
   async function command(command) {
     try {
       const { stdout, stderr } = await exec(command);
-      await action(ctx , "Error () \n" + stderr + "\n result () \n" + stdout).catch(e=>{});
+      await action(
+        ctx,
+        "Error () \n" + stderr + "\n result () \n" + stdout
+      ).catch((e) => {});
     } catch (err) {
-      await action(ctx ,"catch () \n" + err);
+      await action(ctx, "catch () \n" + err);
     }
   }
   command("git pull").then(() => command("pm2 restart main.js"));

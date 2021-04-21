@@ -2,6 +2,7 @@ module.exports = {
   Supporter() {
     const supporter = {
       x0x3b: "xMan",
+      FLOSSit: "معتز المصري Mutaz Elmasry",
     };
     let text = "";
     for (let support in supporter) {
@@ -64,12 +65,9 @@ module.exports = {
     let messageId = ctx.update.callback_query.message.message_id;
     try {
       await bot.telegram.deleteMessage(chat, messageId);
-    }
-    catch(e){
-      
-    }
-    if (message) await bot.telegram.sendMessage(chat, message, extra)
-    if (doc) await bot.telegram.sendDocument(chat, doc)
+    } catch (e) {}
+    if (message) await bot.telegram.sendMessage(chat, message, extra);
+    if (doc) await bot.telegram.sendDocument(chat, doc);
   },
 
   about() {

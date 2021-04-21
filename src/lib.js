@@ -20,7 +20,7 @@ module.exports = {
       "[ - " + mas.category + " - ]" + "\n\n" + mas.zekr + count + reference
     );
   },
-  sendAzkar(bot , category , type = 3) {
+  sendAzkar(bot, category, type = 3) {
     const { getRandomItem, makeMessage, send } = require("./lib");
     let jsonData = require("../db/azkar.json");
     const { Markup } = require("telegraf");
