@@ -58,13 +58,13 @@ module.exports = {
     });
   },
 
-  action(ctx, message, extra = {}, doc) {
+  async action(ctx, message, extra = {}, doc) {
     const bot = this.bot;
     let chat = ctx.update.callback_query.message.chat.id;
     let messageId = ctx.update.callback_query.message.message_id;
-    bot.telegram.deleteMessage(chat, messageId).then();
-    if (message) bot.telegram.sendMessage(chat, message, extra).then();
-    if (doc) bot.telegram.sendDocument(chat, doc).then();
+    await bot.telegram.deleteMessage(chat, messageId)
+    if (message) await bot.telegram.sendMessage(chat, message, extra)
+    if (doc) await bot.telegram.sendDocument(chat, doc)
   },
 
   about() {

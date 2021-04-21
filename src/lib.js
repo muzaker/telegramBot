@@ -20,15 +20,16 @@ module.exports = {
       "[ - " + mas.category + " - ]" + "\n\n" + mas.zekr + count + reference
     );
   },
-  sendAzkar(bot, type) {
+  sendAzkar(bot , category , type = 3) {
     const { getRandomItem, makeMessage, send } = require("./lib");
     let jsonData = require("../db/azkar.json");
     const { Markup } = require("telegraf");
     let mas = getRandomItem(
-      Array.from(jsonData).filter((e) => e.category === type)
+      Array.from(jsonData).filter((e) => e.category === category)
     );
 
     send((user) => {
+      //if(2 <= type) return;
       bot.telegram
         .sendMessage(
           user.id,
@@ -37,7 +38,7 @@ module.exports = {
             [
               Markup.button.url(
                 "باقي الاذكار",
-                "http://muzaker.github.io/?type=" + type
+                "http://muzaker.github.io/?type=" + category
               ),
             ],
           ])

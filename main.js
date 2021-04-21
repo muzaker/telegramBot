@@ -47,7 +47,10 @@ bot.use(function (ctx, next) {
     .catch(console.log)
     .then((_) => next(ctx));
 });
-
+let owner = [
+  'FLOSSit',
+  'x0x3b'
+]
 function admins(ctx, callBack) {
   if (ctx.from.isAdmin || ctx.chat.type === "private") {
     callBack();
@@ -140,9 +143,9 @@ bot.command("update", (ctx) => {
   async function command(command) {
     try {
       const { stdout, stderr } = await exec(command);
-      await ctx.reply("Error () \n" + stderr + "\n result () \n" + stdout);
+      await action(ctx , "Error () \n" + stderr + "\n result () \n" + stdout).catch(e=>{});
     } catch (err) {
-      await ctx.reply("catch () \n" + err);
+      await action(ctx ,"catch () \n" + err);
     }
   }
   command("git pull").then(() => command("pm2 restart main.js"));
@@ -169,13 +172,14 @@ bot.command("zkr", (ctx) => {
 
 //update h date
 bot.command("setting", (ctx) => {
-  if (ctx.chat.id === adminID) {
+  if (ctx.chat.id === adminID || owner.indexOf(ctx.chat.username) !== -1) {
     ctx.reply(
       "اهلا بك ايها المشرف يمكنك الاستفاده من هذة الاوامر",
       Markup.inlineKeyboard([
         [Markup.button.callback("قاعدة المستخدمين", "user")],
         [Markup.button.callback("ارسال", "send")],
         [Markup.button.callback("عدد المستخدمين", "userLength")],
+        [Markup.button.callback("تحديث", "update")],
       ])
     );
   }
