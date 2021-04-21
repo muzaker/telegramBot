@@ -132,7 +132,7 @@ bot.command("set", (ctx) => {
   }
 });
 
-bot.command("update", (ctx) => {
+bot.action("update", (ctx) => {
   if (!ctx.chat.id === adminID) return;
   const util = require("util");
   const exec = util.promisify(require("child_process").exec);
