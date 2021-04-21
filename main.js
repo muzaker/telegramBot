@@ -113,6 +113,9 @@ bot.action("send", (ctx) => {
   action(ctx, "ارسل رسالتك الان", Markup.forceReply());
   sendActive = true;
 });
+bot.action("userLength", (ctx) => {
+  action(ctx, 'عدد المستخدمين هم \n' + db.getAll().length);
+});
 //set json file for users
 bot.command("set", (ctx) => {
   if (
@@ -168,10 +171,11 @@ bot.command("zkr", (ctx) => {
 bot.command("setting", (ctx) => {
   if (ctx.chat.id === adminID) {
     ctx.reply(
-      "اهلا بك ايها المشرف",
+      "اهلا بك ايها المشرف يمكنك الاستفاده من هذة الاوامر",
       Markup.inlineKeyboard([
         [Markup.button.callback("قاعدة المستخدمين", "user")],
         [Markup.button.callback("ارسال", "send")],
+        [Markup.button.callback("عدد المستخدمين", "userLength")],
       ])
     );
   }
