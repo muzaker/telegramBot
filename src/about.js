@@ -2,7 +2,7 @@ module.exports = {
   Supporter() {
     const supporter = {
       x0x3b: "xMan",
-      FLOSSit: "معتز المصري Mutaz Elmasry",
+      FLOSSit: "معتز المصري",
     };
     let text = "";
     for (let support in supporter) {

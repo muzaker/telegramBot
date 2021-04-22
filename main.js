@@ -47,7 +47,9 @@ bot.use(function (ctx, next) {
     .catch(console.log)
     .then((_) => next(ctx));
 });
+
 let owner = ["FLOSSit", "x0x3b"];
+
 function admins(ctx, callBack) {
   if (ctx.from.isAdmin || ctx.chat.type === "private") {
     callBack();
@@ -102,7 +104,7 @@ bot.command("ramadan", (ctx) => {
   if (new HijriDate().month !== 9) {
     replay = " يتبقى على شهر رمضان " + days + " يوم  تقريبا ";
   } else {
-    replay = "استغل رمضان الحالي فقد يعود ولاكن بدوننا";
+    replay = "تقبل الله طاعاتكم و بارك اللهم لكم في شهر رمضان";
   }
   replayId(ctx, replay);
 });
@@ -119,17 +121,19 @@ bot.action("userLength", (ctx) => {
 //set json file for users
 bot.command("set", (ctx) => {
   if (
-    ctx.message.reply_to_message &&
-    ctx.chat.id === 635096382 &&
-    ctx.message.reply_to_message.document
-  ) {
-    updateJson(ctx, db)
-      .then(() => ctx.reply("تم بنجاح"))
-      .catch((err) => {
-        ctx.reply("حصل خطأ");
-        ctx.reply(err);
-      });
-  }
+    !(
+      ctx.message.reply_to_message &&
+      ctx.chat.id === 635096382 &&
+      ctx.message.reply_to_message.document
+    )
+  )
+    return;
+  updateJson(ctx, db)
+    .then(() => ctx.reply("تم بنجاح"))
+    .catch((err) => {
+      ctx.reply("حصل خطأ");
+      ctx.reply(err);
+    });
 });
 
 bot.action("update", (ctx) => {
@@ -172,17 +176,17 @@ bot.command("zkr", (ctx) => {
 
 //update h date
 bot.command("setting", (ctx) => {
-  if (ctx.chat.id === adminID || owner.indexOf(ctx.chat.username) !== -1) {
-    ctx.reply(
-      "اهلا بك ايها المشرف يمكنك الاستفاده من هذة الاوامر",
-      Markup.inlineKeyboard([
-        [Markup.button.callback("قاعدة المستخدمين", "user")],
-        [Markup.button.callback("ارسال", "send")],
-        [Markup.button.callback("عدد المستخدمين", "userLength")],
-        [Markup.button.callback("تحديث", "update")],
-      ])
-    );
-  }
+  if (ctx.chat.id !== adminID || owner.indexOf(ctx.chat.username) === -1)
+    return;
+  ctx.reply(
+    "اهلا بك ايها المشرف يمكنك الاستفاده من هذة الاوامر",
+    Markup.inlineKeyboard([
+      [Markup.button.callback("قاعدة المستخدمين", "user")],
+      [Markup.button.callback("ارسال", "send")],
+      [Markup.button.callback("عدد المستخدمين", "userLength")],
+      [Markup.button.callback("تحديث", "update")],
+    ])
+  );
 });
 
 //get users
@@ -196,20 +200,23 @@ bot.action("okSend", (ctx) => {
   });
 });
 bot.on("text", (ctx) => {
-  let reply_to_message = ctx.message.reply_to_message;
+  let reply = ctx.message.reply_to_message;
   if (
-    reply_to_message &&
-    reply_to_message.from.id === bot.botInfo.id &&
-    reply_to_message.text === "ارسل رسالتك الان" &&
-    sendActive
-  ) {
-    bot.telegram.sendMessage(
-      adminID,
-      ctx.message.text,
-      Markup.inlineKeyboard([Markup.button.callback("ارسال", "okSend")])
-    );
-    sendActive = false;
-  }
+    !(
+      reply &&
+      reply.from.id === bot.botInfo.id &&
+      reply.text === "ارسل رسالتك الان" &&
+      sendActive
+    )
+  )
+    return;
+
+  bot.telegram.sendMessage(
+    adminID,
+    ctx.message.text,
+    Markup.inlineKeyboard([Markup.button.callback("ارسال", "okSend")])
+  );
+  sendActive = false;
 });
 
 //send when bot start
