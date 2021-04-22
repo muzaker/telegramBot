@@ -176,7 +176,7 @@ bot.command("zkr", (ctx) => {
 
 //update h date
 bot.command("setting", (ctx) => {
-  if (ctx.chat.id !== adminID || owner.indexOf(ctx.chat.username) === -1)
+  if(!(ctx.chat.id === adminID || owner.indexOf(ctx.chat.username) !== -1))
     return;
   ctx.reply(
     "اهلا بك ايها المشرف يمكنك الاستفاده من هذة الاوامر",
