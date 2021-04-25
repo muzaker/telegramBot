@@ -141,7 +141,7 @@ bot.command("set", (ctx) => {
     });
 });
 
-bot.action("update", (ctx) => {
+bot.action("update", async (ctx) => {
   if (!ctx.chat.id === adminID) return;
   const util = require("util");
   const exec = util.promisify(require("child_process").exec);
@@ -157,7 +157,9 @@ bot.action("update", (ctx) => {
       await action(ctx, "catch () \n" + err);
     }
   }
-  command("git pull").then(() => command("pm2 restart main.js"));
+  await command("git pull");
+  await command('npm i');
+  command("pm2 restart main.js");
 });
 
 bot.on("new_chat_members", (ctx) => {
