@@ -2,6 +2,8 @@
 require("hijri-date");
 // import Telegraf
 const { Telegraf, Markup } = require("telegraf");
+// import Keyboard lib
+const { Keyboard, Key } = require("telegram-keyboard");
 // import cron
 const cron = require("node-cron");
 // import ranidb
@@ -20,6 +22,7 @@ let {
   adminID,
   Hijri,
 } = require("./src/lib");
+// import about function
 let { about, init, action } = require("./src/about");
 // import Json Data
 let jsonData = require("./db/azkar.json");
@@ -50,11 +53,13 @@ bot.use(function (ctx, next) {
 
 let owner = ["FLOSSit", "x0x3b"];
 
-function admins(ctx, callBack) {
+function admins(ctx, callBack = e=>{}) {
   if (ctx.from.isAdmin || ctx.chat.type === "private") {
     callBack();
+    return true;
   } else {
     ctx.reply("هذا امر مخصص للمشرفين");
+    return false;
   }
 }
 
@@ -78,11 +83,11 @@ bot.command("about", (ctx) => {
 });
 // when some one need bot start in this chat
 bot.command("on", (ctx) => {
-  admins(ctx, (e) => addUsers(db, ctx, bot));
+  admins(ctx, () => addUsers(db, ctx, bot));
 });
 // when some one need bot stop in this chat
 bot.command("off", (ctx) => {
-  admins(ctx, (e) => removeUsers(db, ctx, bot));
+  admins(ctx, () => removeUsers(db, ctx, bot));
 });
 //get new Message
 about();
@@ -176,29 +181,72 @@ bot.command("zkr", (ctx) => {
 
 //update h date
 bot.command("setting", (ctx) => {
-  if(!(ctx.chat.id === adminID || owner.indexOf(ctx.chat.username) !== -1))
+  if (!(ctx.chat.id === adminID || owner.indexOf(ctx.chat.username) !== -1))
     return;
-  ctx.reply(
-    "اهلا بك ايها المشرف يمكنك الاستفاده من هذة الاوامر",
-    Markup.inlineKeyboard([
-      [Markup.button.callback("قاعدة المستخدمين", "user")],
-      [Markup.button.callback("ارسال", "send")],
-      [Markup.button.callback("عدد المستخدمين", "userLength")],
-      [Markup.button.callback("تحديث", "update")],
-    ])
+  const keyboard = Keyboard.inline(
+    [
+      Key.callback("ارسال", "send"),
+      Key.callback("تحديث", "update"),
+      Key.callback("عدد المستخدمين", "userLength"),
+      Key.callback("قاعدة المستخدمين", "user"),
+    ],
+    {
+      columns: 2,
+    }
   );
+
+  ctx.reply("اهلا بك ايها المشرف يمكنك الاستفاده من هذة الاوامر", keyboard);
 });
 
+bot.command("mode", (ctx) => {
+  let id = ctx.chat.id;
+  let user = db.find({id}); 
+  if ( !admins(ctx) ) return;
+  if ( !user ) {
+    ctx.reply('يجب عليك الستجيل في البوت داخل هذة المحادئة باستخدام الامر /on');
+    return;
+  };
+  let type = (user.type || 2) - 1;
+  let keybord = [
+    "رسالتين",
+    "اربع رسائل",
+    "ست رسائل"
+  ];
+  keybord = keybord.map(
+    (elm , index)=> {
+      if (type === index) elm += ' (مفعل)';
+      return Key.callback(elm , "message-" + (index + 1) )
+    }
+  );
+  const board = Keyboard.inline(
+    keybord,
+    {
+      columns: 1,
+    }
+  );
+  ctx.reply('اختر عدد الرسائل التي تريدان يرسلها البوت تلقائيا' , board)
+});
+bot.action(
+  ['message-1' , 'message-2' , 'message-3'] , ctx=>{
+    let name = ctx.update.callback_query.data;
+    let set = e=> db.find({id : ctx.chat.id}).put({type : e});
+    let type = parseInt(name[name.length - 1]);
+    set(type);
+    action(ctx , `تم تغير عدد الرسائل الى ${type * 2}`)
+  }
+)
 //get users
 bot.action("user", (ctx) =>
   action(ctx, false, {}, { source: "./db/users.json" })
 );
+
 bot.action("okSend", (ctx) => {
   action(ctx, false);
   send((e) => {
     sendMessage(e.id, ctx.update.callback_query.message.text);
   });
 });
+
 bot.on("text", (ctx) => {
   let reply = ctx.message.reply_to_message;
   if (
@@ -211,11 +259,8 @@ bot.on("text", (ctx) => {
   )
     return;
 
-  bot.telegram.sendMessage(
-    adminID,
-    ctx.message.text,
-    Markup.inlineKeyboard([Markup.button.callback("ارسال", "okSend")])
-  );
+  let keybord = Keyboard.inline([Key.callback("ارسال", "okSend")]);
+  bot.telegram.sendMessage(adminID, ctx.message.text, keybord);
   sendActive = false;
 });
 
@@ -242,17 +287,49 @@ const options = {
 };
 
 cron.schedule(
-  "0 7,13 * * *",
+  "0 7 * * *",
   () => {
-    sendAzkar(bot, "أذكار الصباح");
+    sendAzkar(bot, 1, "أذكار الصباح");
   },
   options
 );
 
 cron.schedule(
-  "0 17,19 * * *",
+  "0 11 * * *",
   () => {
-    sendAzkar(bot, "أذكار المساء");
+    sendAzkar(bot, 3, "أذكار الصباح");
+  },
+  options
+);
+
+cron.schedule(
+  "0 13 * * *",
+  () => {
+    sendAzkar(bot, 2, "أذكار الصباح");
+  },
+  options
+);
+
+cron.schedule(
+  "0 17 * * *",
+  () => {
+    sendAzkar(bot, 1, "أذكار المساء");
+  },
+  options
+);
+
+cron.schedule(
+  "0 19 * * *",
+  () => {
+    sendAzkar(bot, 2, "أذكار المساء");
+  },
+  options
+);
+
+cron.schedule(
+  "0 22 * * *",
+  () => {
+    sendAzkar(bot, 3, "أذكار المساء");
   },
   options
 );

@@ -1,6 +1,6 @@
 {
   "name": "azkarbot",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -18,8 +18,9 @@
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.1",
     "prompt-sync": "^4.2.0",
-    "ranidb": "^0.0.71",
+    "ranidb": "0.0.72",
     "telegraf": "^4.2.1",
+    "telegram-keyboard": "^2.2.6",
     "util": "^0.12.3"
   },
   "devDependencies": {

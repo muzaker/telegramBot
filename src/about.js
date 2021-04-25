@@ -1,3 +1,5 @@
+const { Keyboard, Key } = require("telegram-keyboard");
+
 module.exports = {
   Supporter() {
     const supporter = {
@@ -10,40 +12,41 @@ module.exports = {
     }
     return text;
   },
-  init(bot) {
-    const { Markup } = require("telegraf");
 
+  init(bot) {
     const { about, Supporter } = require("./about");
 
     let a = require("./about").action;
 
     let action = a.bind({ bot });
-
-    let secBord = Markup.inlineKeyboard([
-      [Markup.button.url("بوت عبود للشاي", "https://t.me/artea_bot")],
-      [
-        Markup.button.callback("ادعمنا", "supportMe"),
-        Markup.button.callback("رجوع", "about"),
-      ],
-    ]);
+    let secBord = [
+      Key.callback("ادعمنا", "supportMe"),
+      Key.callback("رجوع", "about"),
+    ];
     bot.action("Supporter", (ctx) => {
       const text =
-        "الداعمين هم السبب الرائيسي في عمل البوت الخاص بنا وهم" +
-        "\n\n" +
+        "الداعمين هم السبب الرائيسي في عمل البوت الخاص بنا وهم\n\n" +
         Supporter();
-      action(ctx, text, secBord);
+      action(ctx, text, Keyboard.inline([...secBord], { columns: 2 }));
     });
 
     bot.action("myBots", (ctx) => {
       const text = "البوتات الاخرى التي تم صنعناها وهي من تطوير @superastorh";
-      action(ctx, text, secBord);
+      action(
+        ctx,
+        text,
+        Keyboard.inline(
+          [Key.url("بوت عبود للشاي", "https://t.me/artea_bot"), ...secBord],
+          { pattern: [1, 2] }
+        )
+      );
     });
 
     bot.action("supportMe", (ctx) => {
-      let keyBord = Markup.inlineKeyboard([
+      let keyBord = Keyboard.inline([
         [
-          Markup.button.url("باتريون", "https://www.patreon.com/superastorh"),
-          Markup.button.callback("رجوع", "about"),
+          Key.url("باتريون", "https://www.patreon.com/superastorh"),
+          Key.callback("رجوع", "about"),
         ],
       ]);
       let text =
@@ -73,23 +76,20 @@ module.exports = {
   about() {
     const licenseUrl = "https://ojuba.org/waqf-2.0:رخصة_وقف_العامة";
 
-    const { Markup } = require("telegraf");
-
     let about =
       "بوت مذكر هو بوت لنشر اذكار الصباح والمساء بشكل دوري في تيلجرام \n" +
       "البوت مجاني و مرخص برخصة وقف العامة" +
       "\n نرجو منكم دعمنا لنستمر";
-    const buttons = Markup.inlineKeyboard([
+    const buttons = Keyboard.inline(
       [
-        Markup.button.url("المطور", "https://t.me/superastorh"),
-        Markup.button.url("الرخصة", licenseUrl),
+        Key.url("المطور", "https://t.me/superastorh"),
+        Key.url("الرخصة", licenseUrl),
+        Key.callback("ادعمنا", "supportMe"),
+        Key.callback("الداعمين", "Supporter"),
+        Key.callback("بوتات اخرى من صنعنا", "myBots"),
       ],
-      [
-        Markup.button.callback("ادعمنا", "supportMe"),
-        Markup.button.callback("الداعمين", "Supporter"),
-      ],
-      [Markup.button.callback("بوتات اخرى من صنعنا", "myBots")],
-    ]);
+      { columns: 2 }
+    );
     return [about, buttons];
   },
 };

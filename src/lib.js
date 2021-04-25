@@ -20,16 +20,17 @@ module.exports = {
       "[ - " + mas.category + " - ]" + "\n\n" + mas.zekr + count + reference
     );
   },
-  sendAzkar(bot, category, type = 3) {
+  sendAzkar(bot, type = 2, category) {
     const { getRandomItem, makeMessage, send } = require("./lib");
-    let jsonData = require("../db/azkar.json");
     const { Markup } = require("telegraf");
+    let jsonData = require("../db/azkar.json");
     let mas = getRandomItem(
       Array.from(jsonData).filter((e) => e.category === category)
     );
 
     send((user) => {
-      //if(2 <= type) return;
+      let type = user.type || 2;
+      if (type <= type) return;
       bot.telegram
         .sendMessage(
           user.id,
@@ -62,7 +63,7 @@ module.exports = {
     if (db.find({ id: chat.id })) {
       replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
     } else {
-      db.push({ id: chat.id });
+      db.push({ id: chat.id, type: 2 });
 
       replayId(
         ctx,
@@ -121,15 +122,12 @@ and id is ${chat.id}
 
   async updateJson(ctx, db) {
     const axios = require("axios");
-    const { push, removeSame } = require("./lib");
+    const { removeSame } = require("./lib");
     const { file_id: fileId } = ctx.update.message.reply_to_message.document;
     const fileUrl = await ctx.telegram.getFileLink(fileId);
     const response = await axios.get(fileUrl.href);
     db.save(removeSame([...db.getAll(), ...response.data]));
     return "";
-  },
-  push(db, ...items) {
-    items.forEach((item) => db.push(item));
   },
 
   removeSame(arr) {
