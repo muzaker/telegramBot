@@ -30,7 +30,7 @@ module.exports = {
 
     send((user) => {
       let type = user.type || 2;
-      if (type <= type) return;
+      if (!(type <= type)) return;
       bot.telegram
         .sendMessage(
           user.id,
