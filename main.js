@@ -123,7 +123,18 @@ bot.action("send", (ctx) => {
   sendActive = true;
 });
 bot.action("userLength", (ctx) => {
-  action(ctx, "عدد المستخدمين هم \n" + db.getAll().length);
+  let users = db.getAll();
+  let length = (...e)=> db.filter(...e).length;
+  let mes = 
+`
+users length is
+├ all user : ${users.length} 
+├ unset (4)  : ${length(e=> !e.type)}
+├2 messges  : ${length({type : 1})}
+├4 messges  : ${length({type : 2})}
+└6 messges  : ${length({type : 3})}
+`
+  action(ctx, mes);
 });
 //set json file for users
 bot.command("set", (ctx) => {
