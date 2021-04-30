@@ -29,8 +29,8 @@ module.exports = {
     );
 
     send((user) => {
-      let type = user.type || 2;
-      if (!(type <= type)) return;
+      let userType = user.type || 2;
+      if (!(userType <= type)) return;
       bot.telegram
         .sendMessage(
           user.id,

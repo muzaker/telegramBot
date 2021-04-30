@@ -53,7 +53,7 @@ bot.use(function (ctx, next) {
 
 let owner = ["FLOSSit", "x0x3b"];
 
-function admins(ctx, callBack = e=>{}) {
+function admins(ctx, callBack = (e) => {}) {
   if (ctx.from.isAdmin || ctx.chat.type === "private") {
     callBack();
     return true;
@@ -113,7 +113,9 @@ bot.command("ramadan", (ctx) => {
   }
   replayId(ctx, replay);
 });
-
+bot.command("version", (ctx) => {
+  ctx.reply(require("./package.json").version);
+});
 /* for admin command */
 //send message to all users
 bot.action("send", (ctx) => {
@@ -158,7 +160,7 @@ bot.action("update", async (ctx) => {
     }
   }
   await command("git pull");
-  await command('npm i');
+  await command("npm i");
   command("pm2 restart main.js");
 });
 
@@ -202,41 +204,30 @@ bot.command("setting", (ctx) => {
 
 bot.command("mode", (ctx) => {
   let id = ctx.chat.id;
-  let user = db.find({id}); 
-  if ( !admins(ctx) ) return;
-  if ( !user ) {
-    ctx.reply('يجب عليك الستجيل في البوت داخل هذة المحادئة باستخدام الامر /on');
+  let user = db.find({ id });
+  if (!admins(ctx)) return;
+  if (!user) {
+    ctx.reply("يجب عليك الستجيل في البوت داخل هذة المحادئة باستخدام الامر /on");
     return;
-  };
-  let type = (user.type || 2) - 1;
-  let keybord = [
-    "رسالتين",
-    "اربع رسائل",
-    "ست رسائل"
-  ];
-  keybord = keybord.map(
-    (elm , index)=> {
-      if (type === index) elm += ' (مفعل)';
-      return Key.callback(elm , "message-" + (index + 1) )
-    }
-  );
-  const board = Keyboard.inline(
-    keybord,
-    {
-      columns: 1,
-    }
-  );
-  ctx.reply('اختر عدد الرسائل التي تريدان يرسلها البوت تلقائيا' , board)
-});
-bot.action(
-  ['message-1' , 'message-2' , 'message-3'] , ctx=>{
-    let name = ctx.update.callback_query.data;
-    let set = e=> db.find({id : ctx.chat.id}).put({type : e});
-    let type = parseInt(name[name.length - 1]);
-    set(type);
-    action(ctx , `تم تغير عدد الرسائل الى ${type * 2}`)
   }
-)
+  let type = (user.type || 2) - 1;
+  let keybord = ["رسالتين", "اربع رسائل", "ست رسائل"];
+  keybord = keybord.map((elm, index) => {
+    if (type === index) elm += " (مفعل)";
+    return Key.callback(elm, "message-" + (index + 1));
+  });
+  const board = Keyboard.inline(keybord, {
+    columns: 1,
+  });
+  ctx.reply("اختر عدد الرسائل التي تريدان يرسلها البوت تلقائيا", board);
+});
+bot.action(["message-1", "message-2", "message-3"], (ctx) => {
+  let name = ctx.update.callback_query.data;
+  let set = (e) => db.find({ id: ctx.chat.id }).put({ type: e });
+  let type = parseInt(name[name.length - 1]);
+  set(type);
+  action(ctx, `تم تغير عدد الرسائل الى ${type * 2}`);
+});
 //get users
 bot.action("user", (ctx) =>
   action(ctx, false, {}, { source: "./db/users.json" })
