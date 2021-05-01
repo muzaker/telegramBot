@@ -129,10 +129,10 @@ bot.action("userLength", (ctx) => {
 `
 users length is
 ├ all user : ${users.length} 
-├ unset (4)  : ${length(e=> !e.type)}
-├2 messges  : ${length({type : 1})}
-├4 messges  : ${length({type : 2})}
-└6 messges  : ${length({type : 3})}
+├ unset (4)  : ${length(e=> !e.mode)}
+├ 2 messges  : ${length({mode : 1})}
+├ 4 messges  : ${length({mode : 2})}
+└ 6 messges  : ${length({mode : 3})}
 `
   action(ctx, mes);
 });
@@ -176,7 +176,7 @@ bot.action("update", async (ctx) => {
 });
 
 bot.on("new_chat_members", (ctx) => {
-  if (!ctx.message.new_chat_members.username === bot.botInfo.username) return;
+  if (ctx.message.new_chat_members.username !== bot.botInfo.username) return;
   addUsers(db, ctx, bot);
 });
 
@@ -221,10 +221,10 @@ bot.command("mode", (ctx) => {
     ctx.reply("يجب عليك الستجيل في البوت داخل هذة المحادئة باستخدام الامر /on");
     return;
   }
-  let type = (user.type || 2) - 1;
+  let mode = (user.mode || 2) - 1;
   let keybord = ["رسالتين", "اربع رسائل", "ست رسائل"];
   keybord = keybord.map((elm, index) => {
-    if (type === index) elm += " (مفعل)";
+    if (mode === index) elm += " (مفعل)";
     return Key.callback(elm, "message-" + (index + 1));
   });
   const board = Keyboard.inline(keybord, {
@@ -234,10 +234,10 @@ bot.command("mode", (ctx) => {
 });
 bot.action(["message-1", "message-2", "message-3"], (ctx) => {
   let name = ctx.update.callback_query.data;
-  let set = (e) => db.find({ id: ctx.chat.id }).put({ type: e });
-  let type = parseInt(name[name.length - 1]);
-  set(type);
-  action(ctx, `تم تغير عدد الرسائل الى ${type * 2}`);
+  let set = (e) => db.find({ id: ctx.chat.id }).put({ mode : e });
+  let mode = parseInt(name[name.length - 1]);
+  set(mode);
+  action(ctx, `تم تغير عدد الرسائل الى ${mode * 2}`);
 });
 //get users
 bot.action("user", (ctx) =>
@@ -280,7 +280,6 @@ function stop(stop) {
 
   adminSend("تقفل بوت" + "\n @" + bot.botInfo.username);
 }
-
 process.once("SIGINT", () => stop("SIGINT"));
 
 process.once("SIGTERM", () => stop("SIGTERM"));

@@ -20,7 +20,7 @@ module.exports = {
       "[ - " + mas.category + " - ]" + "\n\n" + mas.zekr + count + reference
     );
   },
-  sendAzkar(bot, type = 2, category) {
+  sendAzkar(bot, mode = 2 , category) {
     const { getRandomItem, makeMessage, send } = require("./lib");
     const { Markup } = require("telegraf");
     let jsonData = require("../db/azkar.json");
@@ -29,8 +29,8 @@ module.exports = {
     );
 
     send((user) => {
-      let userType = user.type || 2;
-      if (!(userType <= type)) return;
+      let userMode = user.mode || 2;
+      if (!(userMode <= mode)) return;
       bot.telegram
         .sendMessage(
           user.id,
@@ -63,7 +63,7 @@ module.exports = {
     if (db.find({ id: chat.id })) {
       replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
     } else {
-      db.push({ id: chat.id, type: 2 });
+      db.push({ id: chat.id , mode : 2 , type : ctx.chat.type});
 
       replayId(
         ctx,
