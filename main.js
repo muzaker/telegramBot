@@ -176,7 +176,7 @@ bot.action("update", async (ctx) => {
 });
 
 bot.on("new_chat_members", (ctx) => {
-  if (ctx.message.new_chat_members.username !== bot.botInfo.username) return;
+  if (ctx.message.new_chat_members[0].username !== bot.botInfo.username) return;
   addUsers(db, ctx, bot);
 });
 
