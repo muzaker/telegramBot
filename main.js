@@ -34,6 +34,10 @@ const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 // make vars
 let sendActive = false;
 
+process.on('uncaughtException', err => {
+  adminSend(`error ${JSON.stringify(err)}`)
+})
+
 bot.use(function (ctx, next) {
   /// or other chat types...
   if (ctx.chat.id > 0) return next();
@@ -335,8 +339,8 @@ cron.schedule(
   options
 );
 
-function adminSend(txt) {
-  sendMessage(adminID, txt);
+function adminSend(...msg) {
+  sendMessage(adminID, ...msg);
 }
 
 function sendMessage(chatId, text, extra = {}) {
