@@ -181,6 +181,25 @@ bot.action("update", async (ctx) => {
   command("pm2 restart main.js");
 });
 
+bot.action("restart", async (ctx) => {
+  if (!ctx.chat.id === adminID) return;
+  const util = require("util");
+  const exec = util.promisify(require("child_process").exec);
+
+  async function command(command) {
+    try {
+      const { stdout, stderr } = await exec(command);
+      await action(
+        ctx,
+        "Error () \n" + stderr + "\n result () \n" + stdout
+      ).catch((e) => {});
+    } catch (err) {
+      await action(ctx, "catch () \n" + err);
+    }
+  }
+  command("pm2 restart main.js");
+});
+
 bot.on("new_chat_members", (ctx) => {
   if (ctx.message.new_chat_members[0].username !== bot.botInfo.username) return;
   addUsers(db, ctx, bot);
@@ -211,6 +230,7 @@ bot.command("setting", (ctx) => {
       Key.callback("عدد المستخدمين", "userLength"),
       Key.callback("قاعدة المستخدمين", "user"),
       Key.callback("ضبط المستخدمين", "fixed"),
+      Key.callback("اعادة تشغيل" , "restart"),
     ],
     {
       columns: 2,
