@@ -81,6 +81,7 @@ bot.command("about", (ctx) => {
     );
   }
 });
+
 // when some one need bot start in this chat
 bot.command("on", (ctx) => {
   admins(ctx, () => addUsers(db, ctx, bot));
@@ -124,16 +125,17 @@ bot.action("send", (ctx) => {
 });
 bot.action("userLength", (ctx) => {
   let users = db.getAll();
-  let length = (...e)=> db.filter(...e).length;
-  let mes = 
-`
+  let length = (...e) => db.filter(...e).length;
+  let mes = `
 users length is
-├ all user : ${users.length} 
-├ unset (4)  : ${length(e=> !e.mode)}
-├ 2 messges  : ${length({mode : 1})}
-├ 4 messges  : ${length({mode : 2})}
-└ 6 messges  : ${length({mode : 3})}
-`
+├ all user :  ${users.length} 
+├ unset (4)  :  ${length((e) => !e.mode)}
+├ 2 messges  :  ${length({ mode: 1 })}
+├ 4 messges  :  ${length({ mode: 2 })}
+├ 6 messges  :  ${length({ mode: 3 })}
+├ Private       :  ${length({ type: "private" })}
+└ Group        :  ${length({ type: "group" }) + length({ type: "supergroup" })}
+`;
   action(ctx, mes);
 });
 //set json file for users
@@ -204,6 +206,7 @@ bot.command("setting", (ctx) => {
       Key.callback("تحديث", "update"),
       Key.callback("عدد المستخدمين", "userLength"),
       Key.callback("قاعدة المستخدمين", "user"),
+      Key.callback("ضبط المستخدمين", "fixed"),
     ],
     {
       columns: 2,
@@ -234,7 +237,7 @@ bot.command("mode", (ctx) => {
 });
 bot.action(["message-1", "message-2", "message-3"], (ctx) => {
   let name = ctx.update.callback_query.data;
-  let set = (e) => db.find({ id: ctx.chat.id }).put({ mode : e });
+  let set = (e) => db.find({ id: ctx.chat.id }).put({ mode: e });
   let mode = parseInt(name[name.length - 1]);
   set(mode);
   action(ctx, `تم تغير عدد الرسائل الى ${mode * 2}`);
@@ -246,9 +249,21 @@ bot.action("user", (ctx) =>
 
 bot.action("okSend", (ctx) => {
   action(ctx, false);
-  send((e) => {
-    sendMessage(e.id, ctx.update.callback_query.message.text);
-  });
+  send(bot, 0, ctx.update.callback_query.message.text);
+});
+
+bot.action("fixed", async (ctx) => {
+  async function map(item) {
+    item.mode = item.mode || 2;
+    let chat = await bot.telegram.getChat(item.id);
+    item.type = chat.type;
+    chat.username ? (item.username = chat.username) : "";
+    return item;
+  }
+  const getData = async () => Promise.all(db.getAll().map((item) => map(item)));
+
+  db.save(await getData());
+  action(ctx, "تم بنجاح");
 });
 
 bot.on("text", (ctx) => {
@@ -271,8 +286,9 @@ bot.on("text", (ctx) => {
 //send when bot start
 bot.launch().then(() => start());
 
-function start() {
+async function start() {
   adminSend("اشتغل بوت" + "\n @" + bot.botInfo.username);
+  console.log(`bot is start @${bot.botInfo.username}`);
 }
 
 function stop(stop) {
@@ -290,60 +306,32 @@ const options = {
 };
 
 cron.schedule(
-  "0 7 * * *",
+  "0 */4 * * *",
   () => {
-    sendAzkar(bot, 1, "أذكار الصباح");
+    sendAzkar(bot, 3);
   },
   options
 );
 
 cron.schedule(
-  "0 11 * * *",
+  "0 */6 * * *",
   () => {
-    sendAzkar(bot, 3, "أذكار الصباح");
+    sendAzkar(bot, 2);
   },
   options
 );
 
 cron.schedule(
-  "0 13 * * *",
+  "0 */12 * * *",
   () => {
-    sendAzkar(bot, 2, "أذكار الصباح");
-  },
-  options
-);
-
-cron.schedule(
-  "0 17 * * *",
-  () => {
-    sendAzkar(bot, 1, "أذكار المساء");
-  },
-  options
-);
-
-cron.schedule(
-  "0 19 * * *",
-  () => {
-    sendAzkar(bot, 2, "أذكار المساء");
-  },
-  options
-);
-
-cron.schedule(
-  "0 22 * * *",
-  () => {
-    sendAzkar(bot, 3, "أذكار المساء");
+    sendAzkar(bot, 1);
   },
   options
 );
 
 cron.schedule(
   "0 9 * * 5",
-  () => {
-    send((e) => {
-      sendMessage(e.id, getRandomItem(require("./db/friDay.json")).zekr);
-    });
-  },
+  () => send(bot, 0, getRandomItem(require("./db/friDay.json")).zekr),
   options
 );
 
@@ -357,14 +345,9 @@ function sendMessage(chatId, text, extra = {}) {
 
 function getApi() {
   const prompt = require("prompt-sync")();
-
   const fs = require("fs");
-
   const api = prompt("What is your api bot? => ");
-
   const content = "BOT_TOKEN=" + api;
-
   fs.writeFile(".env", content, () => {});
-
   return api;
 }

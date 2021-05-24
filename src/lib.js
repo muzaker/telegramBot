@@ -20,37 +20,37 @@ module.exports = {
       "[ - " + mas.category + " - ]" + "\n\n" + mas.zekr + count + reference
     );
   },
-  sendAzkar(bot, mode = 2 , category) {
+  sendAzkar(bot, mode) {
     const { getRandomItem, makeMessage, send } = require("./lib");
     const { Markup } = require("telegraf");
     let jsonData = require("../db/azkar.json");
+    let hour = new Date().getHours();
+    let category = hour > 7 && hour < 16 ? "أذكار الصباح" : "أذكار المساء";
     let mas = getRandomItem(
       Array.from(jsonData).filter((e) => e.category === category)
     );
-
-    send((user) => {
-      let userMode = user.mode || 2;
-      if (!(userMode <= mode)) return;
-      bot.telegram
-        .sendMessage(
-          user.id,
-          makeMessage(mas),
-          Markup.inlineKeyboard([
-            [
-              Markup.button.url(
-                "باقي الاذكار",
-                "http://muzaker.github.io/?type=" + category
-              ),
-            ],
-          ])
-        )
-        .then();
-    });
+    send(
+      bot,
+      mode,
+      makeMessage(mas),
+      Markup.inlineKeyboard([
+        [
+          Markup.button.url(
+            "باقي الاذكار",
+            "http://muzaker.github.io/?type=" + category
+          ),
+        ],
+      ])
+    );
   },
-  send(fun) {
+  send(bot, mode = 2, ...message) {
     let ranidb = require("ranidb");
     let users = new ranidb("./db/users.json").getAll();
-    Array.from(users).forEach(fun);
+    Array.from(users).forEach((user) => {
+      if ((user.mode || 2) === mode || mode === 0) {
+        bot.telegram.sendMessage(user.id, ...message);
+      }
+    });
   },
   replayId(ctx, txt) {
     ctx.reply(txt, { reply_to_message_id: ctx.update.message.message_id });
@@ -63,7 +63,7 @@ module.exports = {
     if (db.find({ id: chat.id })) {
       replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
     } else {
-      db.push({ id: chat.id , mode : 2 , type : ctx.chat.type});
+      db.push({ id: chat.id, mode: 2, type: ctx.chat.type, random: false });
 
       replayId(
         ctx,
@@ -103,7 +103,7 @@ and id is ${chat.id}
         ctx,
         "تم ايقاف الارسال التلقائي لهذه المحادثة" +
           "\n" +
-          " من اجل اعادة استعمال الارسال التلقائي في البوت استخدم الامر /off"
+          " من اجل اعادة استعمال الارسال التلقائي في البوت استخدم الامر /on"
       );
 
       bot.telegram.sendMessage(
