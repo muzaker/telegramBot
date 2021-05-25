@@ -26,6 +26,8 @@ let {
 let { about, init, action } = require("./src/about");
 // import Json Data
 let jsonData = require("./db/azkar.json");
+let mAzkar = Array.from(jsonData.filter((e) => e.category === "أذكار الصباح"));
+let nAzkar = Array.from(jsonData.filter((e) => e.category === "أذكار المساء"));
 const db = new ranidb("./db/users.json", { idType: "empty" });
 // config .env file
 require("dotenv").config();
@@ -34,9 +36,10 @@ const bot = new Telegraf(process.env.BOT_TOKEN || getApi());
 // make vars
 let sendActive = false;
 
-process.on('uncaughtException', err => {
-  adminSend(`error ${JSON.stringify(err)}`)
-})
+process.on("uncaughtException", (err) => {
+  adminSend("error \n" + JSON.stringify(err));
+  console.error(err);
+});
 
 bot.use(function (ctx, next) {
   /// or other chat types...
@@ -205,20 +208,35 @@ bot.on("new_chat_members", (ctx) => {
   addUsers(db, ctx, bot);
 });
 
-//zaker
-/*
 bot.command("zkr", (ctx) => {
-  if (db.find({ id: ctx.from.id })) ctx.reply("انت مسجل معنا");
-  let morning = require("./db/azkar.json").filter(
-    (e) => (e.category = "أذكار الصباح")
-  );
   ctx.reply(
-    morning[0].zekr,
-    Markup.inlineKeyboard([Markup.button.callback("التالي", "next")])
+    "اذكار الصباح و المساء بشكل مرتب للمحادثات",
+    Keyboard.inline([
+      Key.callback("اذكار المساء", "N-zkr-0"),
+      Key.callback("اذكار الصباح", "D-zkr-0"),
+    ])
   );
 });
-*/
 
+mAzkar.forEach((elm, index, array) => zkr("D-zkr", elm, index, array));
+
+nAzkar.forEach((elm, index, array) => zkr("N-zkr", elm, index, array));
+
+function zkr(name, elm, index, array) {
+  let length = array.length;
+  let num = index + 1;
+  let button = [];
+  if (num !== 1) button.push(Key.callback("السابق", name + "-" + (index - 1)));
+  if (num !== length)
+    button.push(Key.callback("التالي", name + "-" + (index + 1)));
+  bot.action(name + "-" + index, (ctx) => {
+    action(
+      ctx,
+      makeMessage(elm) + "\n" + num + "/" + length,
+      Keyboard.inline(button)
+    );
+  });
+}
 //update h date
 bot.command("setting", (ctx) => {
   if (!(ctx.chat.id === adminID || owner.indexOf(ctx.chat.username) !== -1))
@@ -230,7 +248,7 @@ bot.command("setting", (ctx) => {
       Key.callback("عدد المستخدمين", "userLength"),
       Key.callback("قاعدة المستخدمين", "user"),
       Key.callback("ضبط المستخدمين", "fixed"),
-      Key.callback("اعادة تشغيل" , "restart"),
+      Key.callback("اعادة تشغيل", "restart"),
     ],
     {
       columns: 2,
@@ -259,6 +277,7 @@ bot.command("mode", (ctx) => {
   });
   ctx.reply("اختر عدد الرسائل التي تريدان يرسلها البوت تلقائيا", board);
 });
+
 bot.action(["message-1", "message-2", "message-3"], (ctx) => {
   let name = ctx.update.callback_query.data;
   let set = (e) => db.find({ id: ctx.chat.id }).put({ mode: e });
@@ -266,6 +285,7 @@ bot.action(["message-1", "message-2", "message-3"], (ctx) => {
   set(mode);
   action(ctx, `تم تغير عدد الرسائل الى ${mode * 2}`);
 });
+
 //get users
 bot.action("user", (ctx) =>
   action(ctx, false, {}, { source: "./db/users.json" })
@@ -277,16 +297,24 @@ bot.action("okSend", (ctx) => {
 });
 
 bot.action("fixed", async (ctx) => {
-  async function map(item) {
-    item.mode = item.mode || 2;
-    let chat = await bot.telegram.getChat(item.id);
-    item.type = chat.type;
-    chat.username ? (item.username = chat.username) : "";
-    return item;
+  action(ctx, "بداية ضيط قاعدة البيانات");
+  async function fil(item) {
+    try {
+      item.mode = item.mode || 2;
+      let chat = await bot.telegram.getChat(item.id);
+      item.type = chat.type;
+      chat.username ? (item.username = chat.username) : "";
+      return item;
+    } catch (err) {
+      return item;
+    }
   }
-  const getData = async () => Promise.all(db.getAll().map((item) => map(item)));
-
-  db.save(await getData());
+  //const getData = async () => Promise.all(db.getAll().map((item) => map(item)));
+  let array = db.getAll();
+  for (let i in array) {
+    array[i] = await fil(array[i]);
+  }
+  db.save(array);
   action(ctx, "تم بنجاح");
 });
 
