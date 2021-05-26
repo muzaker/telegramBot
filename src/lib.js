@@ -1,33 +1,35 @@
 module.exports = {
-  adminID: 635096382,
-
-  getRandomItem(arr) {
+  // Developer ID
+  developerID: 635096382,
+  // get random item in array (array : array)
+  getRandomItem(array) {
     // get random index value
-    const randomIndex = Math.floor(Math.random() * arr.length);
-
+    const randomIndex = Math.floor(Math.random() * array.length);
     // get random item and return it
-    return arr[randomIndex];
+    return array[randomIndex];
   },
-  makeMessage(mas) {
+  // make azkar message (item : object)
+  makeMessage(item) {
     let count =
-      mas.count === "1" || mas.count === ""
+      item.count === "1" || item.count === ""
         ? ""
-        : "\n\n" + mas.count + " مرات ";
+        : "\n\n" + item.count + " مرات ";
 
-    let reference = !mas.reference ? "" : "\n\n" + " رواة " + mas.reference;
+    let reference = !item.reference ? "" : "\n\n" + " رواة " + item.reference;
 
     return (
-      "[ - " + mas.category + " - ]" + "\n\n" + mas.zekr + count + reference
+      "[ - " + item.category + " - ]" + "\n\n" + item.zekr + count + reference
     );
   },
+  // send azkar with mode (bot : telgraf , mode : int )
   sendAzkar(bot, mode) {
     const { getRandomItem, makeMessage, send } = require("./lib");
     const { Markup } = require("telegraf");
-    let jsonData = require("../db/azkar.json");
+    let azkarData = require("../db/azkar.json");
     let hour = new Date().getHours();
     let category = hour > 7 && hour < 16 ? "أذكار الصباح" : "أذكار المساء";
     let mas = getRandomItem(
-      Array.from(jsonData).filter((e) => e.category === category)
+      Array.from(azkarData).filter((e) => e.category === category)
     );
     send(
       bot,
@@ -43,6 +45,7 @@ module.exports = {
       ])
     );
   },
+  //send message for user with mode (bot : telgraf , mode : int , ...message : (chatId , text , extra)
   send(bot, mode = 2, ...message) {
     let ranidb = require("ranidb");
     let users = new ranidb("./db/users.json").getAll();
@@ -52,49 +55,45 @@ module.exports = {
       }
     });
   },
+  // replay to message (ctx : message obj , txt : string)
   replayId(ctx, txt) {
     ctx.reply(txt, { reply_to_message_id: ctx.update.message.message_id });
   },
+  //add user in data base (db : ranidb, ctx:  message obj , bot : telgraf)
   addUsers(db, ctx, bot) {
-    let { replayId, adminID } = require("./lib");
-
+    let { replayId, developerID } = require("./lib");
     let chat = ctx.chat;
-
     if (db.find({ id: chat.id })) {
       replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
     } else {
       db.push({ id: chat.id, mode: 2, type: ctx.chat.type, random: false });
-
       replayId(
         ctx,
         "مرحبا بك سيتم تشغيل هذا البوت هنا الان و الذي يقوم بارسال ذكر اربع مرت في اليوم" +
           "\n" +
           "يمكنكم ايقاف خدمة الارسال التلقائي عن طريقة الامر /off والاستفادة من المميزات الاخرى التي يقدمها البوت دون مشاكل"
       );
-
       bot.telegram.sendMessage(
-        adminID,
-        `
-I am add new user user name is @${chat.username} 
+        developerID,
+        `I am add new user user name is ${
+          chat.username ? "@" + chat.username : "have not username"
+        } 
 and is ${chat.type}
 and name is ${chat.first_name + (chat.last_name || "") || chat.title}
-and id is ${chat.id}
-                `
+and id is ${chat.id}`
       );
 
       bot.telegram
-        .sendDocument(adminID, { source: "./db/users.json" })
+        .sendDocument(developerID, { source: "./db/users.json" })
         .then((e) => {
-          bot.telegram.pinChatMessage(adminID, e.message_id);
+          bot.telegram.pinChatMessage(developerID, e.message_id);
         });
     }
   },
 
   removeUsers(db, ctx, bot) {
-    let { replayId, adminID } = require("./lib");
-
+    let { replayId, developerID } = require("./lib");
     let chat = ctx.chat;
-
     if (!db.find({ id: chat.id })) {
       replayId(ctx, "المحادثة غير مضافه في الارسال التلقائي");
     } else {
@@ -107,7 +106,7 @@ and id is ${chat.id}
       );
 
       bot.telegram.sendMessage(
-        adminID,
+        developerID,
         `
 I am remove user user name is @${chat.username} 
 and is ${chat.type}
@@ -115,8 +114,7 @@ and name is ${chat.first_name + (chat.last_name || "") || chat.title}
 and id is ${chat.id}
                 `
       );
-
-      bot.telegram.sendDocument(adminID, { source: "./db/users.json" });
+      bot.telegram.sendDocument(developerID, { source: "./db/users.json" });
     }
   },
 
@@ -129,19 +127,18 @@ and id is ${chat.id}
     db.save(removeSame([...db.getAll(), ...response.data]));
     return "";
   },
-
-  removeSame(arr) {
-    return arr.filter(
+  // remove same with id in array (array : array)
+  // ex : [{id : 0} , {id : 0} , {id : 1}] => [{id : 0} , {id : 1}]
+  removeSame(array) {
+    return array.filter(
       (thing, index, self) => index === self.findIndex((t) => t.id === thing.id)
     );
   },
+  // get The remaining time in days for the month of ramadan
   ramadan() {
     require("hijri-date");
-
     let year = new HijriDate().year;
-
     let w = true;
-
     let date = () => new HijriDate(year, 9, 1) - new HijriDate();
     while (w) {
       if (date() > 0) {
@@ -153,12 +150,10 @@ and id is ${chat.id}
       }
     }
   },
-
+  // get Hijri date
   Hijri() {
     require("hijri-date");
-
     let Hijri = new HijriDate();
-
     let days = [
       "الاحد",
       "الاثنين",
@@ -168,8 +163,7 @@ and id is ${chat.id}
       "الجمعة",
       "السبت",
     ];
-
-    let mo = [
+    let month = [
       "مُحرَّم",
       "صفَر",
       "ربيعالأول",
@@ -183,8 +177,7 @@ and id is ${chat.id}
       "ذوالقِعدة",
       "ذوالحِجّة",
     ];
-
-    return `${days[Hijri.day]} ${Hijri.date} ${mo[Hijri.month - 1]} ${
+    return `${days[Hijri.day]} ${Hijri.date} ${month[Hijri.month - 1]} ${
       Hijri.year
     }`;
   },

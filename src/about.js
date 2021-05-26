@@ -1,95 +1,106 @@
 const { Keyboard, Key } = require("telegram-keyboard");
-
 module.exports = {
-  Supporter() {
-    const supporter = {
+  // sponsors message creator
+  sponsors() {
+    const sponsors = {
       x0x3b: "xMan",
       FLOSSit: "معتز المصري",
     };
-    let text = "";
-    for (let support in supporter) {
-      text += supporter[support] + " : @" + support + "\n";
+    let message = "";
+    for (let support in sponsors) {
+      message += sponsors[support] + " : @" + support + "\n";
     }
-    return text;
+    return message;
   },
-
+  // add action for button in bot
   init(bot) {
-    const { about, Supporter } = require("./about");
-
-    let a = require("./about").action;
-
-    let action = a.bind({ bot });
-    let secBord = [
-      Key.callback("ادعمنا", "supportMe"),
+    // import function from this file
+    const { about, action, sponsors } = require("./about");
+    // set action function to bot
+    action = action.bind({ bot });
+    // back and be support button
+    let sponsorsButton = [
+      Key.callback("ادعمنا", "be-sponsors"),
       Key.callback("رجوع", "about"),
     ];
-    bot.action("Supporter", (ctx) => {
+    // get name for sponsors
+    bot.action("sponsors", (ctx) => {
       const text =
         "الداعمين هم السبب الرائيسي في عمل البوت الخاص بنا وهم\n\n" +
-        Supporter();
-      action(ctx, text, Keyboard.inline([...secBord], { columns: 2 }));
+        sponsors();
+      action(ctx, text, Keyboard.inline([...sponsorsButton], { columns: 2 }));
     });
-
+    // show own bot
     bot.action("myBots", (ctx) => {
       const text = "البوتات الاخرى التي تم صنعناها وهي من تطوير @superastorh";
       action(
         ctx,
         text,
         Keyboard.inline(
-          [Key.url("بوت عبود للشاي", "https://t.me/artea_bot"), ...secBord],
+          [
+            Key.url("بوت عبود للشاي", "https://t.me/artea_bot"),
+            ...sponsorsButton,
+          ],
           { pattern: [1, 2] }
         )
       );
     });
-
-    bot.action("supportMe", (ctx) => {
-      let keyBord = Keyboard.inline([
+    // be sponsors for this bot
+    bot.action("be-sponsors", (ctx) => {
+      let button = Keyboard.inline(
         [
-          Key.url("باتريون", "https://www.patreon.com/superastorh"),
-          Key.callback("رجوع", "about"),
+          [
+            Key.url("patreon", "https://www.patreon.com/superastorh"),
+            Key.callback("رجوع", "about"),
+          ],
         ],
-      ]);
-      let text =
-        "نرجو منك التواصل مع مطور البوت لمعرفة التفاصيل الازمة\n" +
-        "مطور البوت : @superastorh\n" +
-        "او دعمنا على احد المنصات التاليه";
-
-      action(ctx, text, keyBord);
+        {
+          columns: 1,
+        }
+      );
+      let message =
+        "يمكنك دعم مذكر ماليا لضمان استمرار استضافته و تطويره يمكنك دعمنا على محافظ العملات الرقمية ادناه \n" +
+        "usdt trc20 : TTWXHrhqjBT16mggpQsHoxMRrf7xjv4KWg \n\n" +
+        "bch : bitcoincash:qzu099u6uuvwhjactalynhdyfmkqa6u0dg9ak7nkkj \n\n" +
+        "اطلب ارسال عمله اخر من مطور البوت @superastorh \n" +
+        "او ارسل الى احد المنصات التاليه";
+      action(ctx, message, button);
     });
-
+    // for back button
     bot.action("about", (ctx) => {
       action(ctx, ...about());
     });
   },
-
+  // short way to call action
   async action(ctx, message, extra = {}, doc) {
     const bot = this.bot;
     let chat = ctx.update.callback_query.message.chat.id;
     let messageId = ctx.update.callback_query.message.message_id;
-    try {
-      await bot.telegram.deleteMessage(chat, messageId);
-    } catch (e) {}
-    if (message) await bot.telegram.sendMessage(chat, message, extra);
+    if (message) {
+      await ctx.editMessageText(message, extra);
+    } else {
+      try {
+        await bot.telegram.deleteMessage(chat, messageId);
+      } catch (e) {}
+    }
     if (doc) await bot.telegram.sendDocument(chat, doc);
   },
-
+  // return about message and button it
   about() {
     const licenseUrl = "https://ojuba.org/waqf-2.0:رخصة_وقف_العامة";
-
-    let about =
-      "بوت مذكر هو بوت لنشر اذكار الصباح والمساء بشكل دوري في تيلجرام \n" +
-      "البوت مجاني و مرخص برخصة وقف العامة" +
-      "\n نرجو منكم دعمنا لنستمر";
-    const buttons = Keyboard.inline(
+    let message =
+      "بوت مذكر هو بوت لنشر الاذكار بشكل دوري و العديد من المميزات الاخرى " +
+      "البوت مجاني و مفتوحة المصدر و يحترم خصوصية المستخدمين";
+    const button = Keyboard.inline(
       [
         Key.url("المطور", "https://t.me/superastorh"),
         Key.url("الرخصة", licenseUrl),
-        Key.callback("ادعمنا", "supportMe"),
-        Key.callback("الداعمين", "Supporter"),
+        Key.callback("ادعمنا", "be-sponsors"),
+        Key.callback("الداعمين", "sponsors"),
         Key.callback("بوتات اخرى من صنعنا", "myBots"),
       ],
       { columns: 2 }
     );
-    return [about, buttons];
+    return [message, button];
   },
 };
