@@ -15,9 +15,9 @@ module.exports = {
   // add action for button in bot
   init(bot) {
     // import function from this file
-    const { about, action, sponsors } = require("./about");
+    const { about, sponsors } = require("./about");
     // set action function to bot
-    action = action.bind({ bot });
+    let action = require("./about").action.bind({ bot });
     // back and be support button
     let sponsorsButton = [
       Key.callback("ادعمنا", "be-sponsors"),
@@ -51,11 +51,12 @@ module.exports = {
         [
           [
             Key.url("patreon", "https://www.patreon.com/superastorh"),
+            Key.url("ko-fi", "http://Ko-fi.com/superastorh"),
             Key.callback("رجوع", "about"),
           ],
         ],
         {
-          columns: 1,
+          columns: 2,
         }
       );
       let message =
