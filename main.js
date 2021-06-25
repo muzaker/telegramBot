@@ -387,7 +387,7 @@ function stop(stop) {
 }
 //admin in groub or privet chat
 function admins(ctx, callBack = (e) => {}) {
-  if (ctx.from.isAdmin || ctx.chat.type === "private") {
+  if (ctx.from.isAdmin || ctx.chat.id === ctx.from.id || ctx.from.username == "GroupAnonymousBot") {
     callBack();
     return true;
   } else {
