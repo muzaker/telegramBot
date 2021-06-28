@@ -1,6 +1,8 @@
 module.exports = {
   // Developer ID
   developerID: 635096382,
+  // about link 
+  about:"https://aosus.org/t/topic/1999",
   // get random item in array (array : array)
   getRandomItem(array) {
     // get random index value
@@ -26,23 +28,13 @@ module.exports = {
     const { getRandomItem, makeMessage, send } = require("./lib");
     const { Markup } = require("telegraf");
     let azkarData = require("../db/azkar.json");
-    let hour = new Date().getHours();
-    let category = hour > 7 && hour < 16 ? "أذكار الصباح" : "أذكار المساء";
     let mas = getRandomItem(
-      Array.from(azkarData).filter((e) => e.category === category)
+      Array.from(azkarData)
     );
     send(
       bot,
       mode,
-      makeMessage(mas),
-      Markup.inlineKeyboard([
-        [
-          Markup.button.url(
-            "باقي الاذكار",
-            "http://muzaker.github.io/?type=" + category
-          ),
-        ],
-      ])
+      makeMessage(mas)
     );
   },
   //send message for user with mode (bot : telgraf , mode : int , ...message : (chatId , text , extra)
@@ -55,13 +47,22 @@ module.exports = {
       }
     });
   },
+  sendType(bot, type = "all", ...message) {
+    let ranidb = require("ranidb");
+    let users = new ranidb("./db/users.json").getAll();
+    Array.from(users).forEach((user) => {
+      if (user.type && (user.type === type || (type === "group" && user.type === "supergroup") || type === "all")) {
+        bot.telegram.sendMessage(user.id, ...message);
+      }
+    });
+  },
   // replay to message (ctx : message obj , txt : string)
   replayId(ctx, txt) {
-    ctx.reply(txt, { reply_to_message_id: ctx.update.message.message_id });
+    ctx.replyWithHTML(txt, { reply_to_message_id: ctx.update.message.message_id });
   },
   //add user in data base (db : ranidb, ctx:  message obj , bot : telgraf)
   addUsers(db, ctx, bot) {
-    let { replayId, developerID } = require("./lib");
+    let { replayId, developerID , about} = require("./lib");
     let chat = ctx.chat;
     if (db.find({ id: chat.id })) {
       replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
@@ -69,9 +70,8 @@ module.exports = {
       db.push({ id: chat.id, mode: 2, type: ctx.chat.type, random: false });
       replayId(
         ctx,
-        "مرحبا بك سيتم تشغيل هذا البوت هنا الان و الذي يقوم بارسال ذكر اربع مرت في اليوم" +
-          "\n" +
-          "يمكنكم ايقاف خدمة الارسال التلقائي عن طريقة الامر /off والاستفادة من المميزات الاخرى التي يقدمها البوت دون مشاكل"
+        "مرحبا بك نشكرك على استخدام بوت مذكر بتفعيلك للبوت هنا سيقوم البوت بارسال  الأذكار أربع مرات يوميا ( يمكنك تعديل عدد المرات ) "+
+        `للمزيد من المعلومات <a href="${about}">مقالة تعريفية عن بوت مذكر</a>`
       );
       bot.telegram.sendMessage(
         developerID,
@@ -134,51 +134,24 @@ and id is ${chat.id}
       (thing, index, self) => index === self.findIndex((t) => t.id === thing.id)
     );
   },
-  // get The remaining time in days for the month of ramadan
-  ramadan() {
-    require("hijri-date");
-    let year = new HijriDate().year;
-    let w = true;
-    let date = () => new HijriDate(year, 9, 1) - new HijriDate();
-    while (w) {
-      if (date() > 0) {
-        w = false;
-        let difference = date();
-        return Math.ceil(difference / (1000 * 3600 * 24));
-      } else {
-        year++;
-      }
-    }
-  },
   // get Hijri date
   Hijri() {
-    require("hijri-date");
-    let Hijri = new HijriDate();
-    let days = [
-      "الاحد",
-      "الاثنين",
-      "الثلاثاء",
-      "الاربعاء",
-      "الخميس",
-      "الجمعة",
-      "السبت",
-    ];
-    let month = [
-      "مُحرَّم",
-      "صفَر",
-      "ربيعالأول",
-      "ربيعالآخر",
-      "جماديالأول",
-      "جماديالآخر",
-      "رَجب",
-      "شَعبان",
-      "رَمضان",
-      "شوّال",
-      "ذوالقِعدة",
-      "ذوالحِجّة",
-    ];
-    return `${days[Hijri.day]} ${Hijri.date} ${month[Hijri.month - 1]} ${
-      Hijri.year
-    }`;
+    const moment = require('moment-hijri');
+    moment.locale('ar-SA');
+    return moment().format("dddd iD , iMMMM iYYYY");
+  },
+  async action(ctx, message, extra = {}, doc) {
+    const bot = this.bot;
+    let chat = ctx.update.callback_query.message.chat.id;
+    let messageId = ctx.update.callback_query.message.message_id;
+    if (message) {
+      await ctx.editMessageText(message, extra);
+    } else {
+      try {
+        await bot.telegram.deleteMessage(chat, messageId);
+      } catch (e) {}
+    }
+    if (doc) await bot.telegram.sendDocument(chat, doc);
+    return chat;
   },
 };

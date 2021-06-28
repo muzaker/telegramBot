@@ -1,6 +1,6 @@
 {
   "name": "azkarbot",
-  "version": "3.5.1",
+  "version": "4.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "axios": "^0.21.1",
     "child_process": "^1.0.2",
     "dotenv": "^8.2.0",
-    "hijri-date": "^0.2.2",
+    "moment-hijri": "^2.1.2",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.1",
     "prompt-sync": "^4.2.0",
