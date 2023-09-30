@@ -141,6 +141,13 @@ bot.command("mode", (ctx) => {
   });
   ctx.reply("اختر عدد الرسائل التي تريدان يرسلها البوت تلقائيا", board);
 });
+
+bot.command("toggleReminderBook", (ctx) => {
+  const user = db.find({ id: ctx.chat.id })
+  user.put({ toggleReminderBook: !user.toggleReminderBook });
+  const activeMessage = (!user.toggleReminderBook ? "تم تفعيل" : "تم ايقاف");
+  ctx.reply(`${activeMessage} تذكير اذكار الصباح والمساء`);
+})
 //get admin bot or owner setting
 bot.command("setting", (ctx) => {
   if (!(ctx.chat.id === developerID || owner.indexOf(ctx.chat.username) !== -1))
@@ -366,6 +373,28 @@ const options = {
   scheduled: true,
   timezone: "Asia/Kuwait",
 };
+
+// send morning and evening azkar reminder
+cron.schedule(
+  "* 6,18 * * *",
+  () => {
+    const ranidb = require("ranidb");
+    const users = new ranidb("./db/users.json").getAll();
+    Array.from(users).forEach((user) => {
+      if (user.azkarSunAndMon) {
+        bot.telegram.sendMessage(user.id,
+          "اذكار الصباح و المساء بشكل مرتب للمحادثات",
+          Keyboard.inline([
+            Key.callback("اذكار المساء", "N-zkr-0"),
+            Key.callback("اذكار الصباح", "D-zkr-0"),
+          ])
+        );
+      }
+    });
+  },
+  options
+);
+
 // mode 1 (2 Message in day)
 cron.schedule(
   "0 */4 * * *",
