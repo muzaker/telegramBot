@@ -141,7 +141,7 @@ bot.command("mode", (ctx) => {
   ctx.reply("اختر عدد الرسائل التي تريدان يرسلها البوت تلقائيا", board);
 });
 
-bot.command("toggleReminderBook", (ctx) => {
+bot.command("togglebook", (ctx) => {
   const user = db.find({ id: ctx.chat.id });
   user.put({ toggleReminderBook: !user.toggleReminderBook });
   const activeMessage = !user.toggleReminderBook ? "تم تفعيل" : "تم ايقاف";
