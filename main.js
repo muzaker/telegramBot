@@ -62,11 +62,12 @@ bot.start((ctx) => {
 });
 // when some one need know about from bot
 bot.command("about", (ctx) => {
-  replayId(ctx , 
+  replayId(
+    ctx,
     "نبذه قصيرة عن بوت مذكر \n " +
-    " هو بوت مجاني ومفتوح المصدر من تطوير @salemkode يعمل على إرسال الأذكار بشكل دوري حسب تفضيلات المستخدمين \n" +
-    ` للمزيد من المعلومات واكتشاف المميزات الأخرى يرجع الاطلاع علي <a href="${about}">مقالة تعريفية عن بوت مذكر</a>`
-    )
+      " هو بوت مجاني ومفتوح المصدر من تطوير @salemkode يعمل على إرسال الأذكار بشكل دوري حسب تفضيلات المستخدمين \n" +
+      ` للمزيد من المعلومات واكتشاف المميزات الأخرى يرجع الاطلاع علي <a href="${about}">مقالة تعريفية عن بوت مذكر</a>`
+  );
 });
 // when some one need bot start in this chat
 bot.command("on", (ctx) => {
@@ -100,27 +101,25 @@ bot.command("zkr", (ctx) => {
     ])
   );
 });
-bot.command("quran" , ctx=>{
+bot.command("quran", (ctx) => {
   let mes = ctx.message.text.split(" ");
-  console.log(mes)
+  console.log(mes);
   let index = mes[1];
-  if(mes.length === 1){
+  if (mes.length === 1) {
     ctx.reply(
       "قراة القران الكريم من خلال بوت مذكر",
-      Keyboard.inline([
-        Key.callback("ابدأ الان", "quran-1"),
-      ])
+      Keyboard.inline([Key.callback("ابدأ الان", "quran-1")])
     );
-  } else if(parseInt(index) !== NaN){
-    if(!(index <= 604)){
-      ctx.reply("عدد صفحات القران 604")
-    }else if (!(index >= 1)) {
-      ctx.reply("لايوجد صفحة قبل 1")
-    }else {
-      quran(ctx.chat.id , index)
+  } else if (parseInt(index) !== NaN) {
+    if (!(index <= 604)) {
+      ctx.reply("عدد صفحات القران 604");
+    } else if (!(index >= 1)) {
+      ctx.reply("لايوجد صفحة قبل 1");
+    } else {
+      quran(ctx.chat.id, index);
     }
   }
-})
+});
 //set number of messages per day for chat
 bot.command("mode", (ctx) => {
   let id = ctx.chat.id;
@@ -143,11 +142,11 @@ bot.command("mode", (ctx) => {
 });
 
 bot.command("toggleReminderBook", (ctx) => {
-  const user = db.find({ id: ctx.chat.id })
+  const user = db.find({ id: ctx.chat.id });
   user.put({ toggleReminderBook: !user.toggleReminderBook });
-  const activeMessage = (!user.toggleReminderBook ? "تم تفعيل" : "تم ايقاف");
+  const activeMessage = !user.toggleReminderBook ? "تم تفعيل" : "تم ايقاف";
   ctx.reply(`${activeMessage} تذكير اذكار الصباح والمساء`);
-})
+});
 //get admin bot or owner setting
 bot.command("setting", (ctx) => {
   if (!(ctx.chat.id === developerID || owner.indexOf(ctx.chat.username) !== -1))
@@ -188,7 +187,7 @@ bot.command("set", (ctx) => {
 //send message to all users
 bot.action("send", async (ctx) => {
   let chat = await action(ctx, "");
-  sendMessage(chat , "ارسل رسالتك الان " , Markup.forceReply())
+  sendMessage(chat, "ارسل رسالتك الان ", Markup.forceReply());
   sendActive = true;
 });
 //user Summary Length
@@ -257,7 +256,6 @@ mAzkar.forEach((elm, index, array) => zkr("D-zkr", elm, index, array));
 
 nAzkar.forEach((elm, index, array) => zkr("N-zkr", elm, index, array));
 
-
 function zkr(name, elm, index, array) {
   let length = array.length;
   let num = index + 1;
@@ -274,25 +272,27 @@ function zkr(name, elm, index, array) {
   });
 }
 for (let i = 1; i !== 605; i++) {
-  bot.action("quran-" + i , async ctx=>{
-    let chat = await action(ctx , "");
-    quran(chat , i)
-  })
+  bot.action("quran-" + i, async (ctx) => {
+    let chat = await action(ctx, "");
+    quran(chat, i);
+  });
 }
-function quran(chat , i){
-  let index = ("000").substring(0, 3 - (i +"").length) + i;
-  let next = i === 604 ? 1 : (i - 1);
-  let prev = i === 1 ? 604 : (i + 1);
+function quran(chat, i) {
+  let index = "000".substring(0, 3 - (i + "").length) + i;
+  let next = i === 604 ? 1 : i - 1;
+  let prev = i === 1 ? 604 : i + 1;
   let button = [
     Key.text(i),
     Key.callback("الصفحة التالية◀️ ", "quran" + "-" + prev),
-    Key.callback("▶️الصفحة السابقة", "quran" + "-" + next)
+    Key.callback("▶️الصفحة السابقة", "quran" + "-" + next),
   ];
-  bot.telegram.sendPhoto(chat , "https://mp3quran.net/api/quran_pages_arabic/" + index + ".png" , Keyboard.inline(button ,
-   {
-    pattern:[1,2]
-    } )
-    )
+  bot.telegram.sendPhoto(
+    chat,
+    "https://mp3quran.net/api/quran_pages_arabic/" + index + ".png",
+    Keyboard.inline(button, {
+      pattern: [1, 2],
+    })
+  );
 }
 //mode message callback
 bot.action(["message-1", "message-2", "message-3"], (ctx) => {
@@ -307,13 +307,13 @@ bot.action("user", (ctx) =>
   action(ctx, false, {}, { source: "./db/users.json" })
 );
 // 2- confirmation send message for all user
-bot.action(["send-P","send-G","send-all"], (ctx) => {
+bot.action(["send-P", "send-G", "send-all"], (ctx) => {
   let name = ctx.update.callback_query.data;
-  let indexs = ["send-P","send-G","send-all"];
-  let index = indexs.indexOf(name)
-  let type = index ===  0 ? "private" : index ===  1 ? "group" : "all";
+  let indexs = ["send-P", "send-G", "send-all"];
+  let index = indexs.indexOf(name);
+  let type = index === 0 ? "private" : index === 1 ? "group" : "all";
   action(ctx, false);
-  sendType(bot, type , ctx.update.callback_query.message.text);
+  sendType(bot, type, ctx.update.callback_query.message.text);
 });
 //fix user.json and add mode and type for chat
 bot.action("fixed", async (ctx) => {
@@ -347,13 +347,11 @@ bot.on("text", (ctx) => {
     reply.text === "ارسل رسالتك الان" &&
     sendActive
   ) {
-    let keybord = Keyboard.inline(
-      [
-        Key.callback("المحاداثات الخاصه", "send-P"),
-        Key.callback("المجموعات", "send-G"),
-        Key.callback("الكل", "send-all"),
-      ]
-      );
+    let keybord = Keyboard.inline([
+      Key.callback("المحاداثات الخاصه", "send-P"),
+      Key.callback("المجموعات", "send-G"),
+      Key.callback("الكل", "send-all"),
+    ]);
     adminSend(ctx.message.text, keybord);
     sendActive = false;
   }
@@ -382,7 +380,8 @@ cron.schedule(
     const users = new ranidb("./db/users.json").getAll();
     Array.from(users).forEach((user) => {
       if (user.azkarSunAndMon) {
-        bot.telegram.sendMessage(user.id,
+        bot.telegram.sendMessage(
+          user.id,
           "اذكار الصباح و المساء بشكل مرتب للمحادثات",
           Keyboard.inline([
             Key.callback("اذكار المساء", "N-zkr-0"),
@@ -456,7 +455,11 @@ function stop(stop) {
 }
 //admin in groub or privet chat
 function admins(ctx, callBack = (e) => {}) {
-  if (ctx.from.isAdmin || ctx.chat.id === ctx.from.id || ctx.from.username == "GroupAnonymousBot") {
+  if (
+    ctx.from.isAdmin ||
+    ctx.chat.id === ctx.from.id ||
+    ctx.from.username == "GroupAnonymousBot"
+  ) {
     callBack();
     return true;
   } else {

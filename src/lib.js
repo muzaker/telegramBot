@@ -1,8 +1,8 @@
 module.exports = {
   // Developer ID
   developerID: 635096382,
-  // about link 
-  about:"https://aosus.org/t/topic/1999",
+  // about link
+  about: "https://aosus.org/t/topic/1999",
   // get random item in array (array : array)
   getRandomItem(array) {
     // get random index value
@@ -28,14 +28,8 @@ module.exports = {
     const { getRandomItem, makeMessage, send } = require("./lib");
     const { Markup } = require("telegraf");
     let azkarData = require("../db/azkar.json");
-    let mas = getRandomItem(
-      Array.from(azkarData)
-    );
-    send(
-      bot,
-      mode,
-      makeMessage(mas)
-    );
+    let mas = getRandomItem(Array.from(azkarData));
+    send(bot, mode, makeMessage(mas));
   },
   //send message for user with mode (bot : telgraf , mode : int , ...message : (chatId , text , extra)
   send(bot, mode = 2, ...message) {
@@ -51,18 +45,25 @@ module.exports = {
     let ranidb = require("ranidb");
     let users = new ranidb("./db/users.json").getAll();
     Array.from(users).forEach((user) => {
-      if (user.type && (user.type === type || (type === "group" && user.type === "supergroup") || type === "all")) {
+      if (
+        user.type &&
+        (user.type === type ||
+          (type === "group" && user.type === "supergroup") ||
+          type === "all")
+      ) {
         bot.telegram.sendMessage(user.id, ...message);
       }
     });
   },
   // replay to message (ctx : message obj , txt : string)
   replayId(ctx, txt) {
-    ctx.replyWithHTML(txt, { reply_to_message_id: ctx.update.message.message_id });
+    ctx.replyWithHTML(txt, {
+      reply_to_message_id: ctx.update.message.message_id,
+    });
   },
   //add user in data base (db : ranidb, ctx:  message obj , bot : telgraf)
   addUsers(db, ctx, bot) {
-    let { replayId, developerID , about} = require("./lib");
+    let { replayId, developerID, about } = require("./lib");
     let chat = ctx.chat;
     if (db.find({ id: chat.id })) {
       replayId(ctx, "المحادثة مضافة بالفعل في الارسال التلقائي");
@@ -70,8 +71,8 @@ module.exports = {
       db.push({ id: chat.id, mode: 2, type: ctx.chat.type, random: false });
       replayId(
         ctx,
-        "مرحبا بك نشكرك على استخدام بوت مذكر بتفعيلك للبوت هنا سيقوم البوت بارسال  الأذكار أربع مرات يوميا ( يمكنك تعديل عدد المرات ) "+
-        `للمزيد من المعلومات <a href="${about}">مقالة تعريفية عن بوت مذكر</a>`
+        "مرحبا بك نشكرك على استخدام بوت مذكر بتفعيلك للبوت هنا سيقوم البوت بارسال  الأذكار أربع مرات يوميا ( يمكنك تعديل عدد المرات ) " +
+          `للمزيد من المعلومات <a href="${about}">مقالة تعريفية عن بوت مذكر</a>`
       );
       bot.telegram.sendMessage(
         developerID,
@@ -136,8 +137,8 @@ and id is ${chat.id}
   },
   // get Hijri date
   Hijri() {
-    const moment = require('moment-hijri');
-    moment.locale('ar-SA');
+    const moment = require("moment-hijri");
+    moment.locale("ar-SA");
     return moment().format("dddd iD , iMMMM iYYYY");
   },
   async action(ctx, message, extra = {}, doc) {
