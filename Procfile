@@ -1,1 +1,0 @@
-run: node main.js
