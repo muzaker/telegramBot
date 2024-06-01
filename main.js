@@ -51,7 +51,7 @@ bot.use(function (ctx, next) {
     .then(function (data) {
       if (!data || !data.length) return;
       ctx.chat._admins = data;
-      ctx.from.isAdmin = data.some((adm) => adm.user.id === ctx.from.id);
+      ctx.from.isAdmin = data.some((adm) => adm.user.id === ctx.from?.id);
     })
     .catch(console.log)
     .then((_) => next(ctx));
