@@ -292,7 +292,7 @@ function quran(chat, i) {
     Keyboard.inline(button, {
       pattern: [1, 2],
     })
-  );
+  ).catch(() => {});
 }
 //mode message callback
 bot.action(["message-1", "message-2", "message-3"], (ctx) => {
@@ -387,7 +387,7 @@ cron.schedule(
             Key.callback("اذكار المساء", "N-zkr-0"),
             Key.callback("اذكار الصباح", "D-zkr-0"),
           ])
-        );
+        ).catch(() => {});
       }
     });
   },
@@ -431,7 +431,7 @@ function adminSend(...msg) {
 }
 //send Message short function
 function sendMessage(chatId, text, extra = {}) {
-  bot.telegram.sendMessage(chatId, text, extra).then();
+  bot.telegram.sendMessage(chatId, text, extra).catch(() => {});
 }
 //get api key for bot
 function getApi() {

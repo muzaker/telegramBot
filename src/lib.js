@@ -37,7 +37,7 @@ module.exports = {
     let users = new ranidb("./db/users.json").getAll();
     Array.from(users).forEach((user) => {
       if ((user.mode || 2) === mode || mode === 0) {
-        bot.telegram.sendMessage(user.id, ...message);
+        bot.telegram.sendMessage(user.id, ...message).catch(() => {});
       }
     });
   },
@@ -51,7 +51,7 @@ module.exports = {
           (type === "group" && user.type === "supergroup") ||
           type === "all")
       ) {
-        bot.telegram.sendMessage(user.id, ...message);
+        bot.telegram.sendMessage(user.id, ...message).catch(() => {});
       }
     });
   },
@@ -82,13 +82,13 @@ module.exports = {
 and is ${chat.type}
 and name is ${chat.first_name + (chat.last_name || "") || chat.title}
 and id is ${chat.id}`
-      );
+      ).catch(() => {});
 
       bot.telegram
         .sendDocument(developerID, { source: "./db/users.json" })
         .then((e) => {
           bot.telegram.pinChatMessage(developerID, e.message_id);
-        });
+        }).catch(() => {});
     }
   },
 
@@ -114,8 +114,8 @@ and is ${chat.type}
 and name is ${chat.first_name + (chat.last_name || "") || chat.title}
 and id is ${chat.id}
                 `
-      );
-      bot.telegram.sendDocument(developerID, { source: "./db/users.json" });
+      ).catch(() => {});
+      bot.telegram.sendDocument(developerID, { source: "./db/users.json" }).catch(() => {});
     }
   },
 
@@ -152,7 +152,7 @@ and id is ${chat.id}
         await bot.telegram.deleteMessage(chat, messageId);
       } catch (e) {}
     }
-    if (doc) await bot.telegram.sendDocument(chat, doc);
+    if (doc) await bot.telegram.sendDocument(chat, doc).catch(() => {});
     return chat;
   },
 };
